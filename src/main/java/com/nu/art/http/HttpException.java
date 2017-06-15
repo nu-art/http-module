@@ -8,18 +8,12 @@ import java.io.IOException;
 public class HttpException
 		extends IOException {
 
-	public HttpException() {
-	}
+	private final HttpResponse response;
 
-	public HttpException(String s) {
-		super(s);
-	}
+	private Object error;
 
-	public HttpException(String s, Throwable throwable) {
-		super(s, throwable);
-	}
-
-	public HttpException(Throwable throwable) {
-		super(throwable);
+	public HttpException(HttpResponse response, Object error) {
+		this.response = response;
+		this.error = error;
 	}
 }

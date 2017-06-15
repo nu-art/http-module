@@ -7,6 +7,7 @@
 
 package com.nu.art.http;
 
+import com.nu.art.http.HttpModule.HoopTiming;
 import com.nu.art.http.consts.HttpMethod;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
 import com.nu.art.core.interfaces.ILogger;
@@ -40,6 +41,8 @@ public abstract class HttpRequest
 	InputStream inputStream;
 
 	private Vector<HttpKeyValue> headers = new Vector<>();
+
+	private int requestBodyLength;
 
 	HttpRequest() {
 		addHeader("accept-encoding", "gzip");
@@ -145,7 +148,7 @@ public abstract class HttpRequest
 		connection.setUseCaches(false);
 
 		if (inputStream != null)
-			connection.setFixedLengthStreamingMode(inputStream.available());
+			connection.setFixedLengthStreamingMode(requestBodyLength = inputStream.available());
 
 		for (HttpKeyValue header : headers) {
 			if (header.value == null)
@@ -157,25 +160,21 @@ public abstract class HttpRequest
 		return connection;
 	}
 
-	final void printRequest(ILogger logger) {
-		try {
-			logger.logInfo("+---------------------------- HTTP REQUEST ----------------------------+");
-			logger.logInfo("+---- URL: " + method + " - " + url);
-			logger.logDebug("+---- Connection-Timeout: " + connectionTimeout);
+	final void printRequest(ILogger logger, HoopTiming hoop) {
+		logger.logInfo("+----------------------------- HTTP REQUEST ------------------------------+");
+		logger.logInfo("+---- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
+		logger.logDebug("+---- Connection-Timeout: " + connectionTimeout);
 
-			logger.logVerbose("+---- Headers: ");
-			for (HttpKeyValue header : headers) {
-				logger.logVerbose("+-------  " + header.key + ": " + header.value);
-			}
-
-			if (bodyAsString != null) {
-				logger.logVerbose("+---- Body (body.length()): ");
-				logger.logVerbose(bodyAsString);
-			} else if (inputStream != null)
-				logger.logVerbose("+---- Body Length: " + inputStream.available());
-		} catch (IOException e) {
-			logger.logError("Error printing request", e);
+		logger.logVerbose("+---- Headers: ");
+		for (HttpKeyValue header : headers) {
+			logger.logVerbose("+-------  " + header.key + ": " + header.value);
 		}
+
+		if (bodyAsString != null) {
+			logger.logVerbose("+---- Body (body.length()): ");
+			logger.logVerbose(bodyAsString);
+		} else if (requestBodyLength > 0)
+			logger.logVerbose("+---- Body Length: " + requestBodyLength);
 	}
 
 	final void close() {

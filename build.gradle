@@ -19,21 +19,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile project(':module-manager')
-    compile project(path: ':module-manager')
-    compile project(path: ':belog')
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            def finalPath = 'file://' + LocalMavenRepoPath.toString()
-            repository url: finalPath
-            pom.groupId = group
-            pom.artifactId = artifact
-            pom.version = version
-            pom.packaging = 'jar'
-        }
-    }
+    compile project(':belog')
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

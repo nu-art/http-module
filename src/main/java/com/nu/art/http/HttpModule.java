@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -30,8 +31,10 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-@SuppressWarnings( {"unused", "WeakerAccess"
-				   })
+@SuppressWarnings( {
+											 "unused",
+											 "WeakerAccess"
+									 })
 public final class HttpModule
 		extends Module {
 	//	private Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
@@ -62,26 +65,27 @@ public final class HttpModule
 		logWarning("Very bad idea... calling this is a debug feature ONLY!!!");
 		try {
 			// Create a trust manager that does not validate certificate chains
-			final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
-						throws CertificateException {
-					// Workaround to silence the lint error... This is a debug feature only!
-					int i = 0;
-				}
+			final TrustManager[] trustAllCerts = new TrustManager[]{
+					new X509TrustManager() {
+						@Override
+						public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
+								throws CertificateException {
+							// Workaround to silence the lint error... This is a debug feature only!
+							int i = 0;
+						}
 
-				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
-						throws CertificateException {
-					// Workaround to silence the lint error... This is a debug feature only!
-					int i = 0;
-				}
+						@Override
+						public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+								throws CertificateException {
+							// Workaround to silence the lint error... This is a debug feature only!
+							int i = 0;
+						}
 
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-			}
+						@Override
+						public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+							return null;
+						}
+					}
 			};
 
 			HostnameVerifier hostnameVerifier = new HostnameVerifier() {
@@ -161,7 +165,7 @@ public final class HttpModule
 
 		private HttpResponseListener responseListener;
 
-		private HoopTiming hoop = new HoopTiming();
+		private HoopTiming hoop;
 
 		private HttpTransaction(HttpRequest request, HttpResponseListener responseListener) {
 			super();
@@ -170,35 +174,38 @@ public final class HttpModule
 		}
 
 		@SuppressWarnings("unchecked")
-		private void execute() {
+		private boolean execute() {
+			HoopTiming originalHoop = hoop;
+			hoop = new HoopTiming(originalHoop);
+			hoop.redirectHoop = originalHoop;
 
 			HttpURLConnection connection = null;
+			boolean redirect = false;
 			try {
 				connection = connect();
-				request.printRequest(HttpModule.this);
+				request.printRequest(HttpModule.this, hoop);
 				postBody(connection, request.inputStream);
 
 				response = waitForResponse(connection);
 
 				if (processRedirect()) {
-					execute();
-					return;
+					return redirect = true;
 				}
 
 				if (response.processFailure(connection)) {
 					responseListener.onError(response);
-					return;
+					return false;
 				}
 
-				response.processSuccess(connection);
-				responseListener.onSuccess(response);
+				processSuccess(connection);
 			} catch (Throwable e) {
 				logError("+---- Error: ", e);
 				responseListener.onError(e);
 			} finally {
 				response.printResponse(HttpModule.this);
 				printTiming(HttpModule.this, hoop, "");
-				logInfo("+-------------------------------------------------------------------------+");
+				if (!redirect)
+					logInfo("+-------------------------------------------------------------------------+");
 
 				request.close();
 				response.close();
@@ -206,23 +213,40 @@ public final class HttpModule
 				if (connection != null)
 					connection.disconnect();
 			}
+			return false;
+		}
+
+		private void processSuccess(HttpURLConnection connection)
+				throws IOException {
+			long start = System.currentTimeMillis();
+
+			response.processSuccess(connection);
+			responseListener.onSuccess(response);
+
+			hoop.downloadingAndProcessingInterval = System.currentTimeMillis() - start;
 		}
 
 		final HttpResponse waitForResponse(HttpURLConnection connection)
 				throws IOException {
 			long start = System.currentTimeMillis();
 
+			response = new HttpResponse();
 			response.responseCode = connection.getResponseCode();
-			response.headers = connection.getHeaderFields();
+			response.headers = new HashMap<>(connection.getHeaderFields());
 			String[] keys = ArrayTools.asArray(response.headers.keySet(), String.class);
 
 			for (String key : keys) {
+				if (key == null)
+					continue;
+
 				List<String> value = response.headers.remove(key);
-				response.headers.put(key.toLowerCase(), value);
+				List<String> olderValue = response.headers.put(key.toLowerCase(), value);
+				if (olderValue != null)
+					logWarning("POTENTIAL BUG... SAME HEADER NAME DIFFERENT CASING FOR KEY: " + key);
 			}
 
 			hoop.waitForServerInterval = System.currentTimeMillis() - start;
-			return null;
+			return response;
 		}
 
 		final boolean processRedirect()
@@ -232,7 +256,8 @@ public final class HttpModule
 
 			if (response.responseCode < 300 || response.responseCode >= 400)
 				return false;
-			List<String> locations = response.getHeader("Location");
+
+			List<String> locations = response.getHeader("location");
 			if (locations.size() > 1)
 				throw new IOException("redirect has ambiguous locations... cannot determine which!!");
 
@@ -243,23 +268,16 @@ public final class HttpModule
 			if (location.length() == 0)
 				return false;
 
-			HoopTiming originalHoop = hoop;
-			hoop = new HoopTiming();
-			hoop.redirectHoop = originalHoop;
-
 			request.url = location;
 			return true;
 		}
 
 		private void printTiming(ILogger logger, HoopTiming hoop, String indentation) {
-			if (hoop.redirectHoop != null)
-				printTiming(logger, hoop.redirectHoop, indentation + "-");
-
 			logger.logDebug("+----" + indentation + " Timing, Url: " + hoop.finalUrl.toString());
 			logger.logDebug("+----" + indentation + " Timing, Connection: " + hoop.connectionInterval);
 			logger.logDebug("+----" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
 			logger.logDebug("+----" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
-			logger.logDebug("+----" + indentation + " Timing, Downloading: " + hoop.downloadingInterval);
+			logger.logDebug("+----" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
 			logger.logInfo("+----" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
 		}
 
@@ -323,11 +341,14 @@ public final class HttpModule
 
 		@Override
 		protected void executeAction(HttpTransaction transaction) {
-			transaction.execute();
+			while (transaction.execute())
+				;
 		}
 	}
 
-	private static class HoopTiming {
+	static class HoopTiming {
+
+		final int hoopIndex;
 
 		HoopTiming redirectHoop;
 
@@ -339,14 +360,26 @@ public final class HttpModule
 
 		long waitForServerInterval;
 
-		long downloadingInterval;
+		long downloadingAndProcessingInterval;
+
+		public HoopTiming() {
+			this(null);
+		}
+
+		public HoopTiming(HoopTiming originalHoop) {
+			this.redirectHoop = originalHoop;
+			if (originalHoop != null)
+				hoopIndex = originalHoop.hoopIndex + 1;
+			else
+				hoopIndex = 0;
+		}
 
 		long getTotalTime() {
 			return getTotalHoopTime() + (redirectHoop == null ? 0 : redirectHoop.getTotalTime());
 		}
 
 		long getTotalHoopTime() {
-			return connectionInterval + uploadInterval + waitForServerInterval + downloadingInterval;
+			return connectionInterval + uploadInterval + waitForServerInterval + downloadingAndProcessingInterval;
 		}
 	}
 }

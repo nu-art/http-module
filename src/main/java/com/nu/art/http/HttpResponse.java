@@ -17,17 +17,19 @@ import java.util.zip.GZIPInputStream;
  * Created by TacB0sS on 08-Mar 2017.
  */
 
-public class 	HttpResponse {
+public class HttpResponse {
 
-	int responseCode;
+	public int responseCode;
 
-	Throwable exception;
+	public Throwable exception;
 
 	Map<String, List<String>> headers;
 
 	InputStream inputStream;
 
 	String responseAsString;
+
+	private long responseSize;
 
 	public Map<String, List<String>> getHeaders() {
 		if (headers == null)
@@ -51,7 +53,7 @@ public class 	HttpResponse {
 
 		InputStream responseStream = connection.getErrorStream();
 		if (responseStream == null) {
-			throw new HttpException("Response code: " + responseCode + ", Got an error response without Error Body");
+			throw new HttpException(this, "Got an error response without Error Body");
 		}
 
 		inputStream = connection.getErrorStream();
@@ -73,32 +75,34 @@ public class 	HttpResponse {
 		if (hasEncodingType(EncodingType.GZip))
 			inputStream = new GZIPInputStream(inputStream);
 
+		List<String> header = getHeader("content-length");
+		if (header != null && header.size() == 1)
+			responseSize = Long.valueOf(header.get(0));
+		else if (inputStream != null)
+			responseSize = inputStream.available();
+
 		return inputStream;
 	}
 
 	final void printResponse(ILogger logger) {
-		try {
-			logger.logVerbose("+---- Response Headers: ");
-			for (String key : headers.keySet()) {
-				for (String value : headers.get(key)) {
-					logger.logVerbose("+------- " + key + ": " + value);
-				}
-			}
+		logger.logInfo("+---- Response Code: " + responseCode);
+		if (hasFailed()) {
+			if (responseAsString != null)
+				logger.logError("+---- Response: " + responseAsString);
+			else if (responseSize > 0)
+				logger.logError("+---- Error Response Length: " + responseSize);
+		} else {
+			if (responseAsString != null)
+				logger.logVerbose("+---- Response: " + responseAsString);
+			else if (responseSize > 0)
+				logger.logInfo("+---- Response Length: " + responseSize);
+		}
 
-			logger.logDebug("+---- Response Code: " + responseCode);
-			if (hasFailed()) {
-				if (responseAsString != null)
-					logger.logError("+---- Response: " + responseAsString);
-				else if (inputStream != null && inputStream.available() > 0)
-					logger.logError("+---- Error Response Length: " + inputStream.available());
-			} else {
-				if (responseAsString != null)
-					logger.logVerbose("+---- Response: " + responseAsString);
-				else if (inputStream != null && inputStream.available() > 0)
-					logger.logVerbose("+---- Error Response Length: " + inputStream.available());
+		logger.logVerbose("+---- Response Headers: ");
+		for (String key : headers.keySet()) {
+			for (String value : headers.get(key)) {
+				logger.logVerbose("+------- " + key + ": " + value);
 			}
-		} catch (IOException e) {
-			logger.logError("Error printing response", e);
 		}
 	}
 
