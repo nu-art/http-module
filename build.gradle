@@ -9,13 +9,15 @@
  */
 
 def group = 'com.nu.art.core'
-def artifact = 'belog'
+def artifact = 'http-module'
 def version = '1.0.0'
 apply plugin: 'java'
 apply plugin: 'maven'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+tasks.withType(JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
 
 dependencies {
     compile project(':module-manager')
