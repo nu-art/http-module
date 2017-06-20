@@ -13,6 +13,7 @@ import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
 import com.nu.art.core.utils.PoolQueue;
 import com.nu.art.modular.core.Module;
+import com.nu.art.modular.core.ModuleManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,8 +116,16 @@ public final class HttpModule
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 	}
 
+	public static abstract class BaseTransaction
+			extends Transaction {
+
+		public BaseTransaction() {
+			ModuleManager.ModuleManager.getModule(HttpModule.class).super();
+		}
+	}
+
 	@SuppressWarnings("unused")
-	public abstract class Transaction
+	private abstract class Transaction
 			extends Logger {
 
 		private class HoopTiming {

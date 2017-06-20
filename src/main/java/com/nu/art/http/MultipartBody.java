@@ -13,7 +13,12 @@ public class MultipartBody {
 	public static class Multipart {
 
 		final String fileName;
+
 		final InputStream streamBody;
+
+		public Multipart(String fileName, String streamBody) {
+			this(fileName, new ByteArrayInputStream(streamBody.getBytes()));
+		}
 
 		public Multipart(String fileName, InputStream streamBody) {
 			this.fileName = fileName;
