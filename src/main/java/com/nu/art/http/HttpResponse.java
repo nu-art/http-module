@@ -29,7 +29,7 @@ public class HttpResponse {
 
 	String responseAsString;
 
-	private long responseSize;
+	private int responseSize;
 
 	public Map<String, List<String>> getHeaders() {
 		if (headers == null)
@@ -77,7 +77,7 @@ public class HttpResponse {
 
 		List<String> header = getHeader("content-length");
 		if (header != null && header.size() == 1)
-			responseSize = Long.valueOf(header.get(0));
+			responseSize = Integer.valueOf(header.get(0));
 		else if (inputStream != null)
 			responseSize = inputStream.available();
 
