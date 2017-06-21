@@ -7,6 +7,7 @@
 
 package com.nu.art.http;
 
+import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
@@ -121,6 +122,7 @@ public final class HttpModule
 
 		public BaseTransaction() {
 			ModuleManager.ModuleManager.getModule(HttpModule.class).super();
+			setBeLogged(ModuleManager.ModuleManager.getModule(BeLogged.class));
 		}
 	}
 
@@ -313,8 +315,8 @@ public final class HttpModule
 			while ((length = postStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, length);
 				cached += length;
-				responseListener.onUploadProgress(uploaded, postStream.available());
 				uploaded += length;
+				responseListener.onUploadProgress(uploaded, postStream.available());
 				if (cached < 1024 * 1024)
 					continue;
 
