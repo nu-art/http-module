@@ -26,37 +26,35 @@ public class MultipartBody {
 		}
 	}
 
-	public void setMultipart(IHttpRequest request, Multipart... parts) {
+	public void setMultipart(IHttpRequest request, Multipart... parts)
+			throws IOException {
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
 		String boundary = UUID.randomUUID().toString();
 
 		StringBuilder multipartStart = new StringBuilder();
-		multipartStart.append(twoHyphens).append(boundary).append(lineEnd);
+		multipartStart.append(lineEnd).append(twoHyphens).append(boundary).append(lineEnd);
 		multipartStart.append("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"REMOTE_FILE_NAME\"").append(lineEnd);
 		multipartStart.append(lineEnd);
 
 		StringBuilder multipartEnd = new StringBuilder();
-		multipartEnd.append(twoHyphens).append(boundary).append(twoHyphens).append(lineEnd);
+		multipartEnd.append(lineEnd).append(twoHyphens).append(boundary).append(twoHyphens).append(lineEnd);
 
 		String start = multipartStart.toString();
 		Vector<InputStream> inputStreams = new Vector<>();
 		int lengthAvailable = 0;
 		for (Multipart part : parts) {
-			ByteArrayInputStream is = new ByteArrayInputStream(start.replace("REMOTE_FILE_NAME", part.fileName).getBytes());
-			try {
-				lengthAvailable += is.available() + part.streamBody.available();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			byte[] multipartStartBytes = start.replace("REMOTE_FILE_NAME", part.fileName).getBytes();
+			ByteArrayInputStream is = new ByteArrayInputStream(multipartStartBytes);
+			lengthAvailable += multipartStartBytes.length + part.streamBody.available();
 			inputStreams.add(is);
 			inputStreams.add(part.streamBody);
 		}
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(multipartEnd.toString().getBytes());
-		inputStreams.add(bais);
+		byte[] bytes = multipartEnd.toString().getBytes();
+		lengthAvailable += bytes.length;
+		inputStreams.add(new ByteArrayInputStream(bytes));
 
-		lengthAvailable += bais.available();
 		final int finalLengthAvailable = lengthAvailable;
 		request.setBody(new SequenceInputStream(inputStreams.elements()) {
 			@Override
