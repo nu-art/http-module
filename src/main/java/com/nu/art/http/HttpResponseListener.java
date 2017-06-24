@@ -8,8 +8,9 @@
 package com.nu.art.http;
 
 import com.nu.art.core.exceptions.runtime.ImplementationMissingException;
-import com.nu.art.core.tools.StreamTools;
+import com.nu.art.core.file.Charsets;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -28,10 +29,23 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 	@SuppressWarnings("unchecked")
 	final <Type> Type convertToType(Class<Type> type, HttpResponse response)
 			throws IOException {
+		InputStream inputStream = response.inputStream;
 		if (InputStream.class.isAssignableFrom(responseType))
-			return (Type) response.inputStream;
+			return (Type) inputStream;
 
-		response.responseAsString = StreamTools.readFullyAsString(response.inputStream);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		int available = inputStream.available();
+		int downloaded = 0;
+
+		int length;
+		byte[] buffer = new byte[1024];
+		while ((length = inputStream.read(buffer)) != -1) {
+			bos.write(buffer, 0, length);
+			downloaded += length;
+			onDownloadProgress(downloaded, available);
+		}
+
+		response.responseAsString = bos.toString(Charsets.UTF_8.encoding);
 		if (responseType == String.class)
 			return (Type) response.responseAsString;
 
@@ -60,11 +74,11 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 
 	}
 
-	protected void onUploadProgress(long uploaded, int available) {
+	protected void onUploadProgress(int uploaded, int available) {
 
 	}
 
-	protected void onDownloadProgress(long uploaded, int available) {
+	protected void onDownloadProgress(int downloaded, int available) {
 
 	}
 }

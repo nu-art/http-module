@@ -28,6 +28,5 @@ if (project.hasProperty("configureUploadJavaArtifact")) {
 };
 
 dependencies {
-    compile project(':module-manager')
     compile project(':belog')
 }

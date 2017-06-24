@@ -7,12 +7,14 @@
 
 package com.nu.art.http;
 
+import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
 import com.nu.art.core.utils.PoolQueue;
 import com.nu.art.modular.core.Module;
+import com.nu.art.modular.core.ModuleManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,8 +117,17 @@ public final class HttpModule
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 	}
 
+	public static abstract class BaseTransaction
+			extends Transaction {
+
+		public BaseTransaction() {
+			ModuleManager.ModuleManager.getModule(HttpModule.class).super();
+			setBeLogged(ModuleManager.ModuleManager.getModule(BeLogged.class));
+		}
+	}
+
 	@SuppressWarnings("unused")
-	public abstract class Transaction
+	private abstract class Transaction
 			extends Logger {
 
 		private class HoopTiming {
@@ -154,6 +165,13 @@ public final class HttpModule
 
 		protected final <ListenerType> void dispatchModuleEvent(String message, Class<ListenerType> listenerType, Processor<ListenerType> processor) {
 			HttpModule.this.dispatchModuleEvent(message, listenerType, processor);
+		}
+
+		protected final Throwable createException(HttpResponse httpResponse, String errorBody) {
+			if (httpResponse.exception != null)
+				return httpResponse.exception;
+
+			return new HttpException(httpResponse, errorBody);
 		}
 	}
 
@@ -291,14 +309,14 @@ public final class HttpModule
 			byte[] buffer = new byte[1024];
 			int length;
 			long cached = 0;
-			long uploaded = 0;
+			int uploaded = 0;
 
 			OutputStream outputStream = connection.getOutputStream();
 			while ((length = postStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, length);
 				cached += length;
-				responseListener.onUploadProgress(uploaded, postStream.available());
 				uploaded += length;
+				responseListener.onUploadProgress(uploaded, postStream.available());
 				if (cached < 1024 * 1024)
 					continue;
 
