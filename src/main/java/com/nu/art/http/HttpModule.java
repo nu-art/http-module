@@ -7,7 +7,6 @@
 
 package com.nu.art.http;
 
-import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
@@ -122,7 +121,6 @@ public final class HttpModule
 
 		public BaseTransaction() {
 			ModuleManager.ModuleManager.getModule(HttpModule.class).super();
-			setBeLogged(ModuleManager.ModuleManager.getModule(BeLogged.class));
 		}
 	}
 
