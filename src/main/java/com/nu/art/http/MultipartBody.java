@@ -10,19 +10,26 @@ import java.util.Vector;
 @SuppressWarnings("StringBufferReplaceableByString")
 public class MultipartBody {
 
+	public static final String Key_ItemName = "ITEM_NAME";
+
+	public static final String Key_ItemType = "ITEM_TYPE";
+
 	public static class Multipart {
 
-		final String fileName;
+		final String name;
 
 		final InputStream streamBody;
 
-		public Multipart(String fileName, String streamBody) {
-			this(fileName, new ByteArrayInputStream(streamBody.getBytes()));
+		final boolean isBinaryFile;
+
+		public Multipart(String name, boolean isBinaryFile, String streamBody) {
+			this(name, isBinaryFile, new ByteArrayInputStream(streamBody.getBytes()));
 		}
 
-		public Multipart(String fileName, InputStream streamBody) {
-			this.fileName = fileName;
+		public Multipart(String name, boolean isBinaryFile, InputStream streamBody) {
+			this.name = name;
 			this.streamBody = streamBody;
+			this.isBinaryFile = isBinaryFile;
 		}
 	}
 
@@ -34,7 +41,7 @@ public class MultipartBody {
 
 		StringBuilder multipartStart = new StringBuilder();
 		multipartStart.append(lineEnd).append(twoHyphens).append(boundary).append(lineEnd);
-		multipartStart.append("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"REMOTE_FILE_NAME\"").append(lineEnd);
+		multipartStart.append("Content-Disposition: form-data; " + Key_ItemType + "=\"" + Key_ItemName + "\"").append(lineEnd);
 		multipartStart.append(lineEnd);
 
 		StringBuilder multipartEnd = new StringBuilder();
@@ -44,7 +51,7 @@ public class MultipartBody {
 		Vector<InputStream> inputStreams = new Vector<>();
 		int lengthAvailable = 0;
 		for (Multipart part : parts) {
-			byte[] multipartStartBytes = start.replace("REMOTE_FILE_NAME", part.fileName).getBytes();
+			byte[] multipartStartBytes = start.replace(Key_ItemName, part.name).replace(Key_ItemType, (part.isBinaryFile ? "filename" : "name")).getBytes();
 			ByteArrayInputStream is = new ByteArrayInputStream(multipartStartBytes);
 			lengthAvailable += multipartStartBytes.length + part.streamBody.available();
 			inputStreams.add(is);
