@@ -10,9 +10,9 @@ import java.util.Vector;
 @SuppressWarnings("StringBufferReplaceableByString")
 public class MultipartBody {
 
-	public static final String Key_ItemName = "ITEM_NAME";
+	public static final String Key_FileName = "FILE_NAME";
 
-	public static final String Key_ItemType = "ITEM_TYPE";
+	public static final String Key_Name = "ITEM_NAME";
 
 	public static class Multipart {
 
@@ -41,7 +41,8 @@ public class MultipartBody {
 
 		StringBuilder multipartStart = new StringBuilder();
 		multipartStart.append(lineEnd).append(twoHyphens).append(boundary).append(lineEnd);
-		multipartStart.append("Content-Disposition: form-data; " + Key_ItemType + "=\"" + Key_ItemName + "\"").append(lineEnd);
+
+		multipartStart.append("Content-Disposition: form-data; name=\"" + Key_Name + "\"" + Key_FileName).append(lineEnd);
 		multipartStart.append(lineEnd);
 
 		StringBuilder multipartEnd = new StringBuilder();
@@ -51,7 +52,10 @@ public class MultipartBody {
 		Vector<InputStream> inputStreams = new Vector<>();
 		int lengthAvailable = 0;
 		for (Multipart part : parts) {
-			byte[] multipartStartBytes = start.replace(Key_ItemName, part.name).replace(Key_ItemType, (part.isBinaryFile ? "filename" : "name")).getBytes();
+			String replace = start.replace(Key_Name, part.name);
+			replace = replace.replace(Key_FileName, part.isBinaryFile ? "; filename=\"" + part.name + "\"" : "");
+
+			byte[] multipartStartBytes = replace.getBytes();
 			ByteArrayInputStream is = new ByteArrayInputStream(multipartStartBytes);
 			lengthAvailable += multipartStartBytes.length + part.streamBody.available();
 			inputStreams.add(is);
@@ -75,5 +79,3 @@ public class MultipartBody {
 				.addHeader("Content-Type", "multipart/form-data;boundary=" + boundary); //
 	}
 }
-
-
