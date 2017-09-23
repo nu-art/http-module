@@ -197,12 +197,13 @@ public final class HttpModule
 
 			HttpURLConnection connection = null;
 			boolean redirect = false;
+			response = new HttpResponse();
 			try {
 				connection = connect();
 				request.printRequest(HttpModule.this, hoop);
 				postBody(connection, request.inputStream);
 
-				response = waitForResponse(connection);
+				waitForResponse(response, connection);
 
 				if (processRedirect()) {
 					return redirect = true;
@@ -216,7 +217,8 @@ public final class HttpModule
 				processSuccess(connection);
 			} catch (Throwable e) {
 				logError("+---- Error: ", e);
-				responseListener.onError(e);
+				response.exception = e;
+				responseListener.onError(response, null);
 			} finally {
 				response.printResponse(HttpModule.this);
 				printTiming(HttpModule.this, hoop, "");
@@ -242,11 +244,10 @@ public final class HttpModule
 			hoop.downloadingAndProcessingInterval = System.currentTimeMillis() - start;
 		}
 
-		final HttpResponse waitForResponse(HttpURLConnection connection)
+		final void waitForResponse(HttpResponse response, HttpURLConnection connection)
 				throws IOException {
 			long start = System.currentTimeMillis();
 
-			response = new HttpResponse();
 			response.responseCode = connection.getResponseCode();
 			response.headers = new HashMap<>(connection.getHeaderFields());
 			String[] keys = ArrayTools.asArray(response.headers.keySet(), String.class);
@@ -262,7 +263,6 @@ public final class HttpModule
 			}
 
 			hoop.waitForServerInterval = System.currentTimeMillis() - start;
-			return response;
 		}
 
 		final boolean processRedirect()
@@ -352,7 +352,14 @@ public final class HttpModule
 
 		@Override
 		protected void onExecutionError(HttpTransaction item, Throwable e) {
-			item.responseListener.onError(e);
+			logWarning("DO WE EVEN GET TO THIS ERROR??", e);
+			HttpResponse httpResponse = new HttpResponse();
+			httpResponse.exception = e;
+			try {
+				item.responseListener.onError(httpResponse);
+			} catch (IOException e1) {
+				logError("Not really sure what to do here....?", e1);
+			}
 		}
 
 		@Override

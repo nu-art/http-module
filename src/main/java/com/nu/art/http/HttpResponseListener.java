@@ -70,10 +70,6 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 		onError(httpResponse, convertToType(errorType, httpResponse));
 	}
 
-	protected void onError(Throwable e) {
-
-	}
-
 	protected void onUploadProgress(int uploaded, int available) {
 
 	}
