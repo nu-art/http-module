@@ -13,6 +13,7 @@ import com.nu.art.core.file.Charsets;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class HttpResponseListener<ResponseType, ErrorType> {
@@ -30,15 +31,21 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 	final <Type> Type convertToType(Class<Type> type, HttpResponse response)
 			throws IOException {
 		InputStream inputStream = response.inputStream;
-		if (InputStream.class.isAssignableFrom(responseType))
+		if (InputStream.class.isAssignableFrom(type))
 			return (Type) inputStream;
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		int available = inputStream.available();
-		int downloaded = 0;
-
-		int length;
 		byte[] buffer = new byte[1024];
+		int downloaded = 0;
+		int length;
+		int available;
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		List<String> header = response.getHeader("Content-Length");
+		if (header.size() > 0)
+			available = Integer.parseInt(header.get(0));
+		else
+			available = inputStream.available();
+
 		while ((length = inputStream.read(buffer)) != -1) {
 			bos.write(buffer, 0, length);
 			downloaded += length;
@@ -46,8 +53,8 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 		}
 
 		response.responseAsString = bos.toString(Charsets.UTF_8.encoding);
-		if (responseType == String.class)
-			return (Type) response.responseAsString;
+		if (type == String.class)
+			return (Type) (response.responseAsString);
 
 		return deserialize(type, response.responseAsString);
 	}
@@ -62,19 +69,21 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 
 	final void onSuccess(HttpResponse httpResponse)
 			throws IOException {
-		onSuccess(httpResponse, convertToType(responseType, httpResponse));
+		ResponseType responseBody = convertToType(responseType, httpResponse);
+		onSuccess(httpResponse, responseBody);
 	}
 
 	final void onError(HttpResponse httpResponse)
 			throws IOException {
-		onError(httpResponse, convertToType(errorType, httpResponse));
+		ErrorType errorBody = convertToType(errorType, httpResponse);
+		onError(httpResponse, errorBody);
 	}
 
-	protected void onUploadProgress(int uploaded, int available) {
+	protected void onUploadProgress(long uploaded, long available) {
 
 	}
 
-	protected void onDownloadProgress(int downloaded, int available) {
+	protected void onDownloadProgress(long downloaded, long available) {
 
 	}
 }

@@ -8,6 +8,7 @@ import com.nu.art.core.interfaces.ILogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,12 @@ public class HttpResponse {
 		return headers;
 	}
 
-	List<String> getHeader(String key) {
-		return headers.get(key);
+	public List<String> getHeader(String key) {
+		List<String> headers = this.headers.get(key);
+		if (headers == null)
+			this.headers.put(key, headers = new ArrayList<>());
+
+		return headers;
 	}
 
 	private boolean hasFailed() {
