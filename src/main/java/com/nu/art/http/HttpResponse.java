@@ -40,7 +40,7 @@ public class HttpResponse {
 	}
 
 	public List<String> getHeader(String key) {
-		List<String> headers = this.headers.get(key);
+		List<String> headers = getHeaders().get(key);
 		if (headers == null)
 			this.headers.put(key, headers = new ArrayList<>());
 
