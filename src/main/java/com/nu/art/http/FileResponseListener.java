@@ -20,7 +20,7 @@ public abstract class FileResponseListener<ErrorType>
 	public final void onSuccess(HttpResponse httpResponse, InputStream inputStream) {
 		FileOutputStream outputStream = null;
 		try {
-			List<String> header = httpResponse.getHeader("Content-Length");
+			List<String> header = httpResponse.getHeader("content-length");
 			int available;
 			if (header.size() > 0)
 				available = Integer.parseInt(header.get(0));
