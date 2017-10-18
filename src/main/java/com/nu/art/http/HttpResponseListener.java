@@ -75,7 +75,11 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 
 	final void onError(HttpResponse httpResponse)
 			throws IOException {
-		ErrorType errorBody = convertToType(errorType, httpResponse);
+
+		ErrorType errorBody = null;
+		if (httpResponse.inputStream != null)
+			errorBody = convertToType(errorType, httpResponse);
+
 		onError(httpResponse, errorBody);
 	}
 
