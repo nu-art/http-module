@@ -104,6 +104,7 @@ public class HttpResponse {
 		}
 
 		logger.logVerbose("+---- Response Headers: ");
+		Map<String, List<String>> headers = getHeaders();
 		for (String key : headers.keySet()) {
 			for (String value : headers.get(key)) {
 				logger.logVerbose("+------- " + key + ": " + value);
