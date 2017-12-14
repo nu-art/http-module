@@ -26,6 +26,8 @@ public abstract class HttpRequest
 	// Request
 	private HttpMethod method = HttpMethod.Get;
 
+	String tag;
+
 	String url;
 
 	private String bodyAsString;
@@ -50,6 +52,11 @@ public abstract class HttpRequest
 
 	public final IHttpRequest setUrl(String url) {
 		this.url = url;
+		return this;
+	}
+
+	public final IHttpRequest setTag(String tag) {
+		this.tag = tag;
 		return this;
 	}
 

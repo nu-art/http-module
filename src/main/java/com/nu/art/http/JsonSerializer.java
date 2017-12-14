@@ -11,7 +11,7 @@ public class JsonSerializer
 
 	public static final JsonSerializer Serializer = new JsonSerializer();
 
-	public static final Gson gson = new GsonBuilder().disableInnerClassSerialization().disableHtmlEscaping().setPrettyPrinting().create();
+	public static final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
 	@Override
 	public String serialize(Object o) {
