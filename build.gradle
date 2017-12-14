@@ -29,5 +29,5 @@ if (project.hasProperty("configureUploadJavaArtifact")) {
 
 dependencies {
     compile(resolveDependency('module-manager', 'com.nu-art-software', "${NU_ART_VERSION}"))
-    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.code.gson:gson:2.8.0'
 }
