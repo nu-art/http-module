@@ -29,5 +29,8 @@ if (project.hasProperty("configureUploadJavaArtifact")) {
 
 dependencies {
     _implementation(resolveDependency('module-manager', 'com.nu-art-software', "${NU_ART_VERSION}"))
+    _implementation(resolveDependency('reflection', 'com.nu-art-software', "${NU_ART_VERSION}"))
+    _implementation(resolveDependency('nu-art-core', 'com.nu-art-software', "${NU_ART_VERSION}"))
+    _implementation(resolveDependency('belog', 'com.nu-art-software', "${NU_ART_VERSION}"))
     _implementation 'com.google.code.gson:gson:2.8.0'
 }
