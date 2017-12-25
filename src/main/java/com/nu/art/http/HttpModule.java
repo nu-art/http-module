@@ -161,8 +161,8 @@ public final class HttpModule
 			return HttpModule.this.getModule(moduleType);
 		}
 
-		protected final <ListenerType> void dispatchModuleEvent(String message, Class<ListenerType> listenerType, Processor<ListenerType> processor) {
-			HttpModule.this.dispatchModuleEvent(message, listenerType, processor);
+		protected final <ListenerType> void dispatchModuleEvent(String message, Processor<ListenerType> processor) {
+			HttpModule.this.dispatchModuleEvent(message, processor);
 		}
 
 		protected final Throwable createException(HttpResponse httpResponse, String errorBody) {
