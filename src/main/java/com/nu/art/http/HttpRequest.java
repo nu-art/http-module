@@ -172,7 +172,12 @@ public abstract class HttpRequest
 		logger.logInfo("+---- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
 		logger.logDebug("+---- Connection-Timeout: " + connectionTimeout);
 
-		logger.logVerbose("+---- Headers: ");
+		logger.logVerbose("+---- Request Params: ");
+		for (HttpKeyValue param : urlParams) {
+			logger.logVerbose("+-------  " + param.key + ": " + param.value);
+		}
+
+		logger.logVerbose("+---- Request Headers: ");
 		for (HttpKeyValue header : headers) {
 			logger.logVerbose("+-------  " + header.key + ": " + header.value);
 		}
