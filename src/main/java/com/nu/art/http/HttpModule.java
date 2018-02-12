@@ -345,6 +345,42 @@ public final class HttpModule
 		public void execute(HttpResponseListener listener) {
 			httpAsyncQueue.addItem(new HttpTransaction(this, listener));
 		}
+
+		/**
+		 * To call this method you might be using a bad utility OR you architecture is flawed OR you don't know what you are doing OR you don't have a choice OR you
+		 * are smarter then I have anticipated...
+		 *
+		 * Regardless I think this is a bad way to use a rest api client!
+		 *
+		 * @return The response input stream, <b>be sure to close it when you are done</b>!
+		 */
+		private Throwable error;
+		private InputStream response;
+
+		public InputStream executeSync()
+				throws Throwable {
+			executeAction(new HttpTransaction(this, new HttpResponseListener<InputStream, String>(InputStream.class, String.class) {
+				@Override
+				public void onSuccess(HttpResponse httpResponse, InputStream responseBody) {
+					response = responseBody;
+				}
+
+				@Override
+				public void onError(HttpResponse httpResponse, String errorBody) {
+					error = new IOException(errorBody, httpResponse.exception);
+				}
+			}));
+
+			if (error != null)
+				throw error;
+
+			return response;
+		}
+	}
+
+	protected void executeAction(HttpTransaction transaction) {
+		while (transaction.execute())
+			;
 	}
 
 	private class HttpPoolQueue
@@ -364,8 +400,7 @@ public final class HttpModule
 
 		@Override
 		protected void executeAction(HttpTransaction transaction) {
-			while (transaction.execute())
-				;
+			HttpModule.this.executeAction(transaction);
 		}
 	}
 
