@@ -35,4 +35,7 @@ public interface IHttpRequest {
 	IHttpRequest followRedirect(boolean followRedirect);
 
 	void execute(HttpResponseListener listener);
+
+	InputStream executeSync()
+			throws Throwable;
 }

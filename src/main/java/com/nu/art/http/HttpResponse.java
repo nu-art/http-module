@@ -70,12 +70,12 @@ public class HttpResponse {
 	}
 
 	@SuppressWarnings("unchecked")
-	final InputStream processSuccess(HttpURLConnection connection)
+	final void processSuccess(HttpURLConnection connection)
 			throws IOException {
 		inputStream = connection.getInputStream();
 
 		if (inputStream == null)
-			return null;
+			return;
 
 		if (hasEncodingType(EncodingType.GZip))
 			inputStream = new GZIPInputStream(inputStream);
@@ -85,8 +85,6 @@ public class HttpResponse {
 			responseSize = Integer.valueOf(header.get(0));
 		else if (inputStream != null)
 			responseSize = inputStream.available();
-
-		return inputStream;
 	}
 
 	final void printResponse(ILogger logger) {

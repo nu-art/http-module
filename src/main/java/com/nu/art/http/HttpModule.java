@@ -11,10 +11,13 @@ import com.nu.art.belog.Logger;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
+import com.nu.art.core.tools.StreamTools;
 import com.nu.art.core.utils.PoolQueue;
 import com.nu.art.modular.core.Module;
 import com.nu.art.modular.core.ModuleManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -362,7 +365,13 @@ public final class HttpModule
 			executeAction(new HttpTransaction(this, new HttpResponseListener<InputStream, String>(InputStream.class, String.class) {
 				@Override
 				public void onSuccess(HttpResponse httpResponse, InputStream responseBody) {
-					response = responseBody;
+					try {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						StreamTools.copy(responseBody, baos);
+						response = new ByteArrayInputStream(baos.toByteArray());
+					} catch (IOException e) {
+						error = e;
+					}
 				}
 
 				@Override
