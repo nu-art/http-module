@@ -86,6 +86,9 @@ public abstract class HttpRequest
 	}
 
 	public final IHttpRequest setBody(String body) {
+		if (body == null)
+			return this;
+
 		this.bodyAsString = body;
 		setBody(new ByteArrayInputStream(body.getBytes()));
 		return this;
@@ -128,15 +131,15 @@ public abstract class HttpRequest
 			throws IOException {
 		String urlPath = url;
 		HttpKeyValue[] parameters = getParameters();
-		String params = "";
+		StringBuilder params = new StringBuilder();
 		if (parameters.length > 0)
-			params += urlPath.contains("?") ? "&" : "?";
+			params.append(urlPath.contains("?") ? "&" : "?");
 
 		for (int i = 0; i < parameters.length; i++) {
 			HttpKeyValue parameter = parameters[i];
-			params += parameter.key + "=" + URLEncoder.encode(parameter.value, "utf-8");
+			params.append(parameter.key).append("=").append(URLEncoder.encode(parameter.value, "utf-8"));
 			if (i < parameters.length - 1)
-				params += "&";
+				params.append("&");
 		}
 		urlPath += params;
 
@@ -169,24 +172,24 @@ public abstract class HttpRequest
 
 	final void printRequest(ILogger logger, HoopTiming hoop) {
 		logger.logInfo("+----------------------------- HTTP REQUEST ------------------------------+");
-		logger.logInfo("+---- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
-		logger.logDebug("+---- Connection-Timeout: " + connectionTimeout);
+		logger.logInfo("+-- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
+		logger.logDebug("+-- Connection-Timeout: " + connectionTimeout);
 
-		logger.logVerbose("+---- Request Params: ");
+		logger.logVerbose("+-- Request Params: ");
 		for (HttpKeyValue param : urlParams) {
-			logger.logVerbose("+-------  " + param.key + ": " + param.value);
+			logger.logVerbose("+----  " + param.key + ": " + param.value);
 		}
 
-		logger.logVerbose("+---- Request Headers: ");
+		logger.logVerbose("+-- Request Headers: ");
 		for (HttpKeyValue header : headers) {
-			logger.logVerbose("+-------  " + header.key + ": " + header.value);
+			logger.logVerbose("+----  " + header.key + ": " + header.value);
 		}
 
 		if (bodyAsString != null) {
-			logger.logVerbose("+---- Body (body.length()): ");
+			logger.logVerbose("+-- Body (" + bodyAsString.getBytes().length + "): ");
 			logger.logVerbose(bodyAsString);
 		} else if (requestBodyLength > 0)
-			logger.logVerbose("+---- Body Length: " + requestBodyLength);
+			logger.logVerbose("+-- Body Length: " + requestBodyLength);
 	}
 
 	final void close() {

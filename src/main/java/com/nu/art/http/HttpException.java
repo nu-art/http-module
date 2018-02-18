@@ -8,9 +8,9 @@ import java.io.IOException;
 public class HttpException
 		extends IOException {
 
-	private final HttpResponse response;
+	public final HttpResponse response;
 
-	private Object error;
+	public final Object error;
 
 	public HttpException(HttpResponse response, Object error) {
 		this.response = response;

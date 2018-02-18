@@ -88,24 +88,24 @@ public class HttpResponse {
 	}
 
 	final void printResponse(ILogger logger) {
-		logger.logInfo("+---- Response Code: " + responseCode);
+		logger.logInfo("+-- Response Code: " + responseCode);
 		if (hasFailed()) {
 			if (responseAsString != null)
-				logger.logError("+---- Response: " + responseAsString);
+				logger.logError("+-- Response: " + responseAsString);
 			else if (responseSize > 0)
-				logger.logError("+---- Error Response Length: " + responseSize);
+				logger.logError("+-- Error Response Length: " + responseSize);
 		} else {
 			if (responseAsString != null)
-				logger.logVerbose("+---- Response: " + responseAsString);
+				logger.logVerbose("+-- Response: " + responseAsString);
 			else if (responseSize > 0)
-				logger.logInfo("+---- Response Length: " + responseSize);
+				logger.logInfo("+-- Response Length: " + responseSize);
 		}
 
-		logger.logVerbose("+---- Response Headers: ");
+		logger.logVerbose("+-- Response Headers: ");
 		Map<String, List<String>> headers = getHeaders();
 		for (String key : headers.keySet()) {
 			for (String value : headers.get(key)) {
-				logger.logVerbose("+------- " + key + ": " + value);
+				logger.logVerbose("+---- " + key + ": " + value);
 			}
 		}
 	}

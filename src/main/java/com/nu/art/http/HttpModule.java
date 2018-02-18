@@ -41,7 +41,6 @@ import javax.net.ssl.X509TrustManager;
 									 })
 public final class HttpModule
 		extends Module {
-	//	private Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 
 	public static final HttpResponseListener EmptyResponseListener = new EmptyResponseListener();
 
@@ -219,7 +218,7 @@ public final class HttpModule
 
 				processSuccess(connection);
 			} catch (Throwable e) {
-				logError("+---- Error: ", e);
+				logError("+-- Error: ", e);
 				response.exception = e;
 				responseListener.onError(response, null);
 			} finally {
@@ -292,12 +291,12 @@ public final class HttpModule
 		}
 
 		private void printTiming(ILogger logger, HoopTiming hoop, String indentation) {
-			logger.logDebug("+----" + indentation + " Timing, Url: " + hoop.finalUrl.toString());
-			logger.logDebug("+----" + indentation + " Timing, Connection: " + hoop.connectionInterval);
-			logger.logDebug("+----" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
-			logger.logDebug("+----" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
-			logger.logDebug("+----" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
-			logger.logInfo("+----" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
+			logger.logDebug("+--" + indentation + " Timing, Url: " + hoop.finalUrl.toString());
+			logger.logDebug("+--" + indentation + " Timing, Connection: " + hoop.connectionInterval);
+			logger.logDebug("+--" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
+			logger.logDebug("+--" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
+			logger.logDebug("+--" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
+			logger.logInfo("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
 		}
 
 		final OutputStream postBody(HttpURLConnection connection, InputStream postStream)
