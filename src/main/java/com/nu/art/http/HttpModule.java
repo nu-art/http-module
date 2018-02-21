@@ -42,27 +42,45 @@ import javax.net.ssl.X509TrustManager;
 public final class HttpModule
 		extends Module {
 
+	public static class ExecutionPool {
+
+		String key;
+		int numberOfThreads;
+
+		public ExecutionPool(String key, int numberOfThreads) {
+			this.key = key;
+			this.numberOfThreads = numberOfThreads;
+		}
+	}
+
+	public ExecutionPool DefaultExecutionPool = new ExecutionPool("http-thread", 5);
 	public static final HttpResponseListener EmptyResponseListener = new EmptyResponseListener();
-
-	private static final int ThreadCount = 5;
-
-	private int threadCount = ThreadCount;
 
 	/**
 	 * PoolQueue holding the requests to be executed by its thread pool
 	 */
-	private HttpPoolQueue httpAsyncQueue = new HttpPoolQueue();
+	private HashMap<String, HttpPoolQueue> queues = new HashMap<>();
 
 	private HttpModule() { }
 
-	public void setThreadCount(int threadCount) {
-		this.threadCount = threadCount;
+	private HttpPoolQueue getOrCreateQueue(ExecutionPool executionPool) {
+		if (executionPool == null)
+			executionPool = DefaultExecutionPool;
+
+		HttpPoolQueue queue = queues.get(executionPool.key);
+		if (queue == null) {
+			queues.put(executionPool.key, queue = new HttpPoolQueue());
+			queue.createThreads(executionPool.key, executionPool.numberOfThreads);
+		}
+		return queue;
+	}
+
+	public void setDefaultExecutionPoolThreadCount(int threadCount) {
+		this.DefaultExecutionPool.numberOfThreads = threadCount;
 	}
 
 	@Override
-	protected void init() {
-		httpAsyncQueue.createThreads("Http Thread Pool", threadCount);
-	}
+	protected void init() {}
 
 	public final void trustAllCertificates() {
 		logWarning("Very bad idea... calling this is a debug feature ONLY!!!");
@@ -345,7 +363,8 @@ public final class HttpModule
 
 		@Override
 		public void execute(HttpResponseListener listener) {
-			httpAsyncQueue.addItem(new HttpTransaction(this, listener));
+			HttpPoolQueue queue = getOrCreateQueue(executionPool);
+			queue.addItem(new HttpTransaction(this, listener));
 		}
 
 		/**

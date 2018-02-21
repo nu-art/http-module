@@ -7,10 +7,11 @@
 
 package com.nu.art.http;
 
-import com.nu.art.http.HttpModule.HoopTiming;
-import com.nu.art.http.consts.HttpMethod;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
 import com.nu.art.core.interfaces.ILogger;
+import com.nu.art.http.HttpModule.ExecutionPool;
+import com.nu.art.http.HttpModule.HoopTiming;
+import com.nu.art.http.consts.HttpMethod;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,6 +26,8 @@ public abstract class HttpRequest
 
 	// Request
 	private HttpMethod method = HttpMethod.Get;
+
+	ExecutionPool executionPool ;
 
 	String tag;
 
@@ -91,6 +94,11 @@ public abstract class HttpRequest
 
 		this.bodyAsString = body;
 		setBody(new ByteArrayInputStream(body.getBytes()));
+		return this;
+	}
+
+	protected IHttpRequest setExecutionPool(ExecutionPool executionPool) {
+		this.executionPool = executionPool;
 		return this;
 	}
 
