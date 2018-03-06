@@ -135,7 +135,7 @@ public abstract class HttpRequest
 		return allParameters.toArray(new HttpKeyValue[allParameters.size()]);
 	}
 
-	final URL composeURL()
+	final String composeURL()
 			throws IOException {
 		String urlPath = url;
 		HttpKeyValue[] parameters = getParameters();
@@ -151,7 +151,7 @@ public abstract class HttpRequest
 		}
 		urlPath += params;
 
-		return new URL(urlPath);
+		return urlPath;
 	}
 
 	final HttpURLConnection connect(URL url)

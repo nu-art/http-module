@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
@@ -352,7 +353,16 @@ public final class HttpModule
 		private HttpURLConnection connect()
 				throws IOException {
 			long start = System.currentTimeMillis();
-			HttpURLConnection connection = request.connect(hoop.finalUrl = request.composeURL());
+
+			String urlPath = request.composeURL();
+			URL url;
+			try {
+				url = new URL(urlPath);
+			} catch (MalformedURLException e) {
+				throw new IOException("error parsing url: " + urlPath, e);
+			}
+
+			HttpURLConnection connection = request.connect(hoop.finalUrl = url);
 			hoop.connectionInterval = System.currentTimeMillis() - start;
 			return connection;
 		}
