@@ -237,6 +237,9 @@ public final class HttpModule
 
 				processSuccess(connection);
 			} catch (Throwable e) {
+				if (connection == null)
+					request.printRequest(HttpModule.this, hoop);
+
 				logError("+-- Error: ", e);
 				response.exception = e;
 				responseListener.onError(response, null);
