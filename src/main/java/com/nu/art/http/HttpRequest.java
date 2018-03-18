@@ -27,7 +27,7 @@ public abstract class HttpRequest
 	// Request
 	private HttpMethod method = HttpMethod.Get;
 
-	ExecutionPool executionPool ;
+	ExecutionPool executionPool;
 
 	String tag;
 
