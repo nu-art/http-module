@@ -34,7 +34,7 @@ public class MultipartBody {
 	}
 
 	public void setMultipart(IHttpRequest request, Multipart... parts)
-			throws IOException {
+		throws IOException {
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
 		String boundary = UUID.randomUUID().toString();
@@ -70,12 +70,12 @@ public class MultipartBody {
 		request.setBody(new SequenceInputStream(inputStreams.elements()) {
 			@Override
 			public int available()
-					throws IOException {
+				throws IOException {
 				return finalLengthAvailable;
 			}
 		}) //
-					 .addHeader("Connection", "Keep-Alive") //
-					 .addHeader("ENCTYPE", "multipart/form-data") //
-					 .addHeader("Content-Type", "multipart/form-data;boundary=" + boundary); //
+		       .addHeader("Connection", "Keep-Alive") //
+		       .addHeader("ENCTYPE", "multipart/form-data") //
+		       .addHeader("Content-Type", "multipart/form-data;boundary=" + boundary); //
 	}
 }

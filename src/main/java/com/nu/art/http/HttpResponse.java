@@ -52,7 +52,7 @@ public class HttpResponse {
 	}
 
 	final boolean processFailure(HttpURLConnection connection)
-			throws IOException {
+		throws IOException {
 		if (!hasFailed())
 			return false;
 
@@ -71,7 +71,7 @@ public class HttpResponse {
 
 	@SuppressWarnings("unchecked")
 	final void processSuccess(HttpURLConnection connection)
-			throws IOException {
+		throws IOException {
 		inputStream = connection.getInputStream();
 
 		if (inputStream == null)

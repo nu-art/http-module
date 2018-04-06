@@ -37,5 +37,5 @@ public interface IHttpRequest {
 	void execute(HttpResponseListener listener);
 
 	InputStream executeSync()
-			throws Throwable;
+		throws Throwable;
 }

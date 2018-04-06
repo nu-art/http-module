@@ -22,7 +22,7 @@ import java.net.URLEncoder;
 import java.util.Vector;
 
 public abstract class HttpRequest
-		implements IHttpRequest {
+	implements IHttpRequest {
 
 	// Request
 	private HttpMethod method = HttpMethod.Get;
@@ -136,7 +136,7 @@ public abstract class HttpRequest
 	}
 
 	final String composeURL()
-			throws IOException {
+		throws IOException {
 		String urlPath = url;
 		HttpKeyValue[] parameters = getParameters();
 		StringBuilder params = new StringBuilder();
@@ -155,7 +155,7 @@ public abstract class HttpRequest
 	}
 
 	final HttpURLConnection connect(URL url)
-			throws IOException {
+		throws IOException {
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod(method.method);

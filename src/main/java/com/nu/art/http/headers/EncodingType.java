@@ -7,7 +7,7 @@ import com.nu.art.http.interfaces.HeaderType;
  * Created by TacB0sS on 08-Mar 2017.
  */
 public enum EncodingType
-		implements HeaderType {
+	implements HeaderType {
 	GZip("gzip"),
 	//
 	;

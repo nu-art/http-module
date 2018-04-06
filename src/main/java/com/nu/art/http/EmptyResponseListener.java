@@ -3,7 +3,7 @@ package com.nu.art.http;
 import java.io.InputStream;
 
 final class EmptyResponseListener
-		extends HttpResponseListener<InputStream, InputStream> {
+	extends HttpResponseListener<InputStream, InputStream> {
 
 	EmptyResponseListener() {
 		super(InputStream.class, InputStream.class);

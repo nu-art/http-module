@@ -7,7 +7,7 @@ import com.nu.art.http.interfaces.HeaderType;
  * Created by TacB0sS on 08-Mar 2017.
  */
 public enum ContentType
-		implements HeaderType {
+	implements HeaderType {
 	JSON("application/json"),
 	XML("application/xml"),
 	TextPlain("text/plain"),

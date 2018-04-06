@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public abstract class FileResponseListener<ErrorType>
-		extends HttpResponseListener<InputStream, ErrorType> {
+	extends HttpResponseListener<InputStream, ErrorType> {
 
 	private final File targetFile;
 

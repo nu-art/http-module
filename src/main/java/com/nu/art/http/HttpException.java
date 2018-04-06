@@ -6,7 +6,7 @@ import java.io.IOException;
  * Created by TacB0sS on 02-Mar 2017.
  */
 public class HttpException
-		extends IOException {
+	extends IOException {
 
 	public final HttpResponse response;
 
