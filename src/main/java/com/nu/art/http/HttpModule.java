@@ -37,11 +37,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 @SuppressWarnings( {
-											 "unused",
-											 "WeakerAccess"
-									 })
+	                   "unused",
+	                   "WeakerAccess"
+                   })
 public final class HttpModule
-		extends Module {
+	extends Module {
 
 	public static class ExecutionPool {
 
@@ -88,26 +88,26 @@ public final class HttpModule
 		try {
 			// Create a trust manager that does not validate certificate chains
 			final TrustManager[] trustAllCerts = new TrustManager[]{
-					new X509TrustManager() {
-						@Override
-						public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
-								throws CertificateException {
-							// Workaround to silence the lint error... This is a debug feature only!
-							int i = 0;
-						}
-
-						@Override
-						public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
-								throws CertificateException {
-							// Workaround to silence the lint error... This is a debug feature only!
-							int i = 0;
-						}
-
-						@Override
-						public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-							return null;
-						}
+				new X509TrustManager() {
+					@Override
+					public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {
+						// Workaround to silence the lint error... This is a debug feature only!
+						int i = 0;
 					}
+
+					@Override
+					public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {
+						// Workaround to silence the lint error... This is a debug feature only!
+						int i = 0;
+					}
+
+					@Override
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+				}
 			};
 
 			HostnameVerifier hostnameVerifier = new HostnameVerifier() {
@@ -138,7 +138,7 @@ public final class HttpModule
 	}
 
 	public static abstract class BaseTransaction
-			extends Transaction {
+		extends Transaction {
 
 		public BaseTransaction() {
 			ModuleManager.ModuleManager.getModule(HttpModule.class).super();
@@ -147,7 +147,7 @@ public final class HttpModule
 
 	@SuppressWarnings("unused")
 	private abstract class Transaction
-			extends Logger {
+		extends Logger {
 
 		private class HoopTiming {
 
@@ -259,7 +259,7 @@ public final class HttpModule
 		}
 
 		private void processSuccess(HttpURLConnection connection)
-				throws IOException {
+			throws IOException {
 			long start = System.currentTimeMillis();
 
 			response.processSuccess(connection);
@@ -269,7 +269,7 @@ public final class HttpModule
 		}
 
 		final void waitForResponse(HttpResponse response, HttpURLConnection connection)
-				throws IOException {
+			throws IOException {
 			long start = System.currentTimeMillis();
 
 			response.responseCode = connection.getResponseCode();
@@ -290,7 +290,7 @@ public final class HttpModule
 		}
 
 		final boolean processRedirect()
-				throws IOException {
+			throws IOException {
 			if (!request.autoRedirect)
 				return false;
 
@@ -322,7 +322,7 @@ public final class HttpModule
 		}
 
 		final OutputStream postBody(HttpURLConnection connection, InputStream postStream)
-				throws IOException {
+			throws IOException {
 
 			if (postStream == null)
 				return null;
@@ -354,7 +354,7 @@ public final class HttpModule
 		}
 
 		private HttpURLConnection connect()
-				throws IOException {
+			throws IOException {
 			long start = System.currentTimeMillis();
 
 			String urlPath = request.composeURL();
@@ -372,7 +372,7 @@ public final class HttpModule
 	}
 
 	private class HttpRequestIn
-			extends HttpRequest {
+		extends HttpRequest {
 
 		@Override
 		public void execute(HttpResponseListener listener) {
@@ -381,7 +381,8 @@ public final class HttpModule
 		}
 
 		/**
-		 * To call this method you might be using a bad utility OR you architecture is flawed OR you don't know what you are doing OR you don't have a choice OR you
+		 * To call this method you might be using a bad utility OR your architecture is flawed OR you don't know what you are doing OR you don't have a choice OR
+		 * you
 		 * are smarter then I have anticipated...
 		 *
 		 * Regardless I think this is a bad way to use a rest api client!
@@ -392,7 +393,7 @@ public final class HttpModule
 		private InputStream response;
 
 		public InputStream executeSync()
-				throws Throwable {
+			throws Throwable {
 			executeAction(new HttpTransaction(this, new HttpResponseListener<InputStream, String>(InputStream.class, String.class) {
 				@Override
 				public void onSuccess(HttpResponse httpResponse, InputStream responseBody) {
@@ -424,7 +425,7 @@ public final class HttpModule
 	}
 
 	private class HttpPoolQueue
-			extends PoolQueue<HttpTransaction> {
+		extends PoolQueue<HttpTransaction> {
 
 		@Override
 		protected void onExecutionError(HttpTransaction item, Throwable e) {

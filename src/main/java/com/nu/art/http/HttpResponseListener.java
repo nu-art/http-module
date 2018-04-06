@@ -15,12 +15,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static com.nu.art.core.generics.GenericParamExtractor._GenericParamExtractor;
+
 @SuppressWarnings("WeakerAccess")
 public abstract class HttpResponseListener<ResponseType, ErrorType> {
 
 	protected final Class<ResponseType> responseType;
 
 	protected final Class<ErrorType> errorType;
+
+	protected HttpResponseListener() {
+		responseType = _GenericParamExtractor.extractGenericType(HttpResponseListener.class, this, 0);
+		errorType = _GenericParamExtractor.extractGenericType(HttpResponseListener.class, this, 1);
+	}
 
 	protected HttpResponseListener(Class<ResponseType> responseType, Class<ErrorType> errorType) {
 		this.responseType = responseType;
@@ -29,7 +36,7 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 
 	@SuppressWarnings("unchecked")
 	final <Type> Type convertToType(Class<Type> type, HttpResponse response)
-			throws IOException {
+		throws IOException {
 		InputStream inputStream = response.inputStream;
 		if (InputStream.class.isAssignableFrom(type))
 			return (Type) inputStream;
@@ -68,13 +75,13 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 	public abstract void onError(HttpResponse httpResponse, ErrorType errorBody);
 
 	final void onSuccess(HttpResponse httpResponse)
-			throws IOException {
+		throws IOException {
 		ResponseType responseBody = convertToType(responseType, httpResponse);
 		onSuccess(httpResponse, responseBody);
 	}
 
 	final void onError(HttpResponse httpResponse)
-			throws IOException {
+		throws IOException {
 
 		ErrorType errorBody = null;
 		if (httpResponse.inputStream != null)

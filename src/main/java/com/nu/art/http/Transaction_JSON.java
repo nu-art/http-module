@@ -9,7 +9,7 @@ import com.nu.art.http.HttpModule.BaseTransaction;
  */
 
 public class Transaction_JSON
-		extends BaseTransaction {
+	extends BaseTransaction {
 
 	public static final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -23,7 +23,11 @@ public class Transaction_JSON
 	}
 
 	public static abstract class JsonHttpResponseListener<Type>
-			extends HttpResponseListener<Type, String> {
+		extends HttpResponseListener<Type, String> {
+
+		protected JsonHttpResponseListener() {
+			super();
+		}
 
 		protected JsonHttpResponseListener(Class<Type> responseType) {
 			super(responseType, String.class);
