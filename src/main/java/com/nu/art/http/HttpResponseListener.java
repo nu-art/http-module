@@ -87,6 +87,9 @@ public abstract class HttpResponseListener<ResponseType, ErrorType> {
 		if (httpResponse.inputStream != null)
 			errorBody = convertToType(errorType, httpResponse);
 
+		if (httpResponse.exception == null)
+			httpResponse.exception = new HttpException(httpResponse, errorBody);
+
 		onError(httpResponse, errorBody);
 	}
 
