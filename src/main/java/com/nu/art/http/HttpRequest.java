@@ -21,33 +21,26 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Vector;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
 public abstract class HttpRequest
 	implements IHttpRequest {
 
 	// Request
 	private HttpMethod method = HttpMethod.Get;
-
 	ExecutionPool executionPool;
-
 	String tag;
-
 	String url;
-
 	private String bodyAsString;
-
 	private int connectionTimeout = 10000;
-
 	private int readTimeout = 20000;
-
 	private Vector<HttpKeyValue> urlParams = new Vector<>();
-
 	boolean autoRedirect = true;
-
 	InputStream inputStream;
-
 	private Vector<HttpKeyValue> headers = new Vector<>();
-
 	private int requestBodyLength;
+	private SSLContext sslContext;
 
 	HttpRequest() {
 		addHeader("accept-encoding", "gzip");
@@ -99,6 +92,12 @@ public abstract class HttpRequest
 
 	protected IHttpRequest setExecutionPool(ExecutionPool executionPool) {
 		this.executionPool = executionPool;
+		return this;
+	}
+
+	@Override
+	public IHttpRequest setSSLContext(SSLContext sslContext) {
+		this.sslContext = sslContext;
 		return this;
 	}
 
@@ -158,6 +157,9 @@ public abstract class HttpRequest
 		throws IOException {
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		if (sslContext != null && connection instanceof HttpsURLConnection)
+			((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
+
 		connection.setRequestMethod(method.method);
 		connection.setInstanceFollowRedirects(autoRedirect);
 		connection.setConnectTimeout(connectionTimeout);
@@ -174,6 +176,7 @@ public abstract class HttpRequest
 
 			connection.addRequestProperty(header.key, header.value);
 		}
+
 		connection.connect();
 		return connection;
 	}
@@ -182,6 +185,9 @@ public abstract class HttpRequest
 		logger.logInfo("+----------------------------- HTTP REQUEST ------------------------------+");
 		logger.logInfo("+-- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
 		logger.logDebug("+-- Connection-Timeout: " + connectionTimeout);
+
+		if (sslContext != null)
+			logger.logDebug("+-- SSL-Context: " + sslContext);
 
 		logger.logVerbose("+-- Request Params: ");
 		for (HttpKeyValue param : urlParams) {

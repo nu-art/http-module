@@ -11,6 +11,8 @@ import com.nu.art.http.consts.HttpMethod;
 
 import java.io.InputStream;
 
+import javax.net.ssl.SSLContext;
+
 @SuppressWarnings("WeakerAccess")
 public interface IHttpRequest {
 
@@ -27,6 +29,8 @@ public interface IHttpRequest {
 	IHttpRequest setBody(String body);
 
 	IHttpRequest setConnectTimeout(int connectedTimeout);
+
+	IHttpRequest setSSLContext(SSLContext sslContext);
 
 	IHttpRequest setReadTimeout(int readTimeout);
 
