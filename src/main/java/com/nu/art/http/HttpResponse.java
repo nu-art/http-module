@@ -93,12 +93,12 @@ public class HttpResponse {
 			if (responseAsString != null)
 				logger.logError("+-- Response: " + responseAsString);
 			else if (responseSize > 0)
-				logger.logError("+-- Error Response Length: " + responseSize);
+				logger.logVerbose("+-- Error Response Length: " + responseSize);
 		} else {
 			if (responseAsString != null)
-				logger.logVerbose("+-- Response: " + responseAsString);
+				logger.logDebug("+-- Response: " + responseAsString);
 			else if (responseSize > 0)
-				logger.logInfo("+-- Response Length: " + responseSize);
+				logger.logVerbose("+-- Response Length: " + responseSize);
 		}
 
 		logger.logVerbose("+-- Response Headers: ");

@@ -7,7 +7,9 @@
 
 package com.nu.art.http;
 
+import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
+import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
@@ -56,6 +58,7 @@ public final class HttpModule
 
 	public ExecutionPool DefaultExecutionPool = new ExecutionPool("http-thread", 5);
 	public static final HttpResponseListener EmptyResponseListener = new EmptyResponseListener();
+	private LogLevel defaultLogLevel = LogLevel.Debug;
 
 	/**
 	 * PoolQueue holding the requests to be executed by its thread pool
@@ -74,6 +77,10 @@ public final class HttpModule
 			queue.createThreads(executionPool.key, executionPool.numberOfThreads);
 		}
 		return queue;
+	}
+
+	public void setDefaultLogLevel(LogLevel defaultLogLevel) {
+		this.defaultLogLevel = defaultLogLevel;
 	}
 
 	public void setDefaultExecutionPoolThreadCount(int threadCount) {
@@ -196,16 +203,18 @@ public final class HttpModule
 
 	private class HttpTransaction {
 
-		private HttpRequest request;
-
-		private HttpResponse response;
-
-		private HttpResponseListener responseListener;
+		private Logger logger = BeLogged.getInstance().getLogger(HttpModule.this);
 
 		private HoopTiming hoop;
+		private HttpRequest request;
+		private HttpResponse response;
+		private HttpResponseListener responseListener;
 
 		private HttpTransaction(HttpRequest request, HttpResponseListener responseListener) {
 			super();
+			logger.setMinLogLevel(request.logLevel != null ? request.logLevel : defaultLogLevel);
+
+			logger.setMinLogLevel(request.logLevel);
 			this.request = request;
 			this.responseListener = responseListener;
 		}
@@ -221,7 +230,7 @@ public final class HttpModule
 			response = new HttpResponse();
 			try {
 				connection = connect();
-				request.printRequest(HttpModule.this, hoop);
+				request.printRequest(logger, hoop);
 				postBody(connection, request.inputStream);
 
 				waitForResponse(response, connection);
@@ -238,16 +247,16 @@ public final class HttpModule
 				processSuccess(connection);
 			} catch (Throwable e) {
 				if (connection == null)
-					request.printRequest(HttpModule.this, hoop);
+					request.printRequest(logger, hoop);
 
-				logError("+-- Error: ", e);
+				logger.logError("+-- Error: ", e);
 				response.exception = e;
 				responseListener.onError(response, null);
 			} finally {
-				response.printResponse(HttpModule.this);
-				printTiming(HttpModule.this, hoop, "");
+				response.printResponse(logger);
+				printTiming(logger, hoop, "");
 				if (!redirect)
-					logInfo("+-------------------------------------------------------------------------+");
+					logger.logVerbose("+-------------------------------------------------------------------------+");
 
 				request.close();
 				response.close();
@@ -283,7 +292,7 @@ public final class HttpModule
 				List<String> value = response.headers.remove(key);
 				List<String> olderValue = response.headers.put(key.toLowerCase(), value);
 				if (olderValue != null)
-					logWarning("POTENTIAL BUG... SAME HEADER NAME DIFFERENT CASING FOR KEY: " + key);
+					logger.logWarning("POTENTIAL BUG... SAME HEADER NAME DIFFERENT CASING FOR KEY: " + key);
 			}
 
 			hoop.waitForServerInterval = System.currentTimeMillis() - start;
@@ -313,12 +322,12 @@ public final class HttpModule
 		}
 
 		private void printTiming(ILogger logger, HoopTiming hoop, String indentation) {
-			logger.logDebug("+--" + indentation + " Timing, Url: " + hoop.finalUrl.toString());
-			logger.logDebug("+--" + indentation + " Timing, Connection: " + hoop.connectionInterval);
-			logger.logDebug("+--" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
-			logger.logDebug("+--" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
-			logger.logDebug("+--" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
-			logger.logInfo("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
+			logger.logVerbose("+--" + indentation + " Timing, Url: " + hoop.finalUrl.toString());
+			logger.logVerbose("+--" + indentation + " Timing, Connection: " + hoop.connectionInterval);
+			logger.logVerbose("+--" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
+			logger.logVerbose("+--" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
+			logger.logVerbose("+--" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
+			logger.logDebug("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
 		}
 
 		final OutputStream postBody(HttpURLConnection connection, InputStream postStream)

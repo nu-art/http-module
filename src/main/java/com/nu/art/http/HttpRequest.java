@@ -7,6 +7,7 @@
 
 package com.nu.art.http;
 
+import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.http.HttpModule.ExecutionPool;
@@ -27,6 +28,8 @@ import javax.net.ssl.SSLContext;
 public abstract class HttpRequest
 	implements IHttpRequest {
 
+	private String finalUrl;
+
 	// Request
 	private HttpMethod method = HttpMethod.Get;
 	ExecutionPool executionPool;
@@ -41,9 +44,15 @@ public abstract class HttpRequest
 	private Vector<HttpKeyValue> headers = new Vector<>();
 	private int requestBodyLength;
 	private SSLContext sslContext;
+	LogLevel logLevel;
 
 	HttpRequest() {
 		addHeader("accept-encoding", "gzip");
+	}
+
+	public final IHttpRequest setLogLevel(LogLevel logLevel) {
+		this.logLevel = logLevel;
+		return this;
 	}
 
 	public final IHttpRequest setUrl(String url) {
@@ -150,7 +159,7 @@ public abstract class HttpRequest
 		}
 		urlPath += params;
 
-		return urlPath;
+		return finalUrl = urlPath;
 	}
 
 	final HttpURLConnection connect(URL url)
@@ -182,16 +191,16 @@ public abstract class HttpRequest
 	}
 
 	final void printRequest(ILogger logger, HoopTiming hoop) {
-		logger.logInfo("+----------------------------- HTTP REQUEST ------------------------------+");
-		logger.logInfo("+-- URL(" + hoop.hoopIndex + "): " + method + " - " + url);
-		logger.logDebug("+-- Connection-Timeout: " + connectionTimeout);
+		logger.logVerbose("+----------------------------- HTTP REQUEST ------------------------------+");
+		logger.logInfo("+-- URL(" + hoop.hoopIndex + "): " + method + " - " + finalUrl);
+		logger.logVerbose("+-- Connection-Timeout: " + connectionTimeout);
 
 		if (sslContext != null)
-			logger.logDebug("+-- SSL-Context: " + sslContext);
+			logger.logVerbose("+-- SSL-Context: " + sslContext);
 
-		logger.logVerbose("+-- Request Params: ");
+		logger.logDebug("+-- Request Params: ");
 		for (HttpKeyValue param : urlParams) {
-			logger.logVerbose("+----  " + param.key + ": " + param.value);
+			logger.logDebug("+----  " + param.key + ": " + param.value);
 		}
 
 		logger.logVerbose("+-- Request Headers: ");
@@ -201,7 +210,7 @@ public abstract class HttpRequest
 
 		if (bodyAsString != null) {
 			logger.logVerbose("+-- Body (" + bodyAsString.getBytes().length + "): ");
-			logger.logVerbose(bodyAsString);
+			logger.logDebug("+-- Body: " + bodyAsString);
 		} else if (requestBodyLength > 0)
 			logger.logVerbose("+-- Body Length: " + requestBodyLength);
 	}
