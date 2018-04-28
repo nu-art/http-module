@@ -58,7 +58,7 @@ public final class HttpModule
 
 	public ExecutionPool DefaultExecutionPool = new ExecutionPool("http-thread", 5);
 	public static final HttpResponseListener EmptyResponseListener = new EmptyResponseListener();
-	private LogLevel defaultLogLevel = LogLevel.Debug;
+	private LogLevel defaultLogLevel = LogLevel.Verbose;
 
 	/**
 	 * PoolQueue holding the requests to be executed by its thread pool
@@ -213,14 +213,15 @@ public final class HttpModule
 		private HttpTransaction(HttpRequest request, HttpResponseListener responseListener) {
 			super();
 			logger.setMinLogLevel(request.logLevel != null ? request.logLevel : defaultLogLevel);
-
-			logger.setMinLogLevel(request.logLevel);
 			this.request = request;
 			this.responseListener = responseListener;
 		}
 
 		@SuppressWarnings("unchecked")
 		private boolean execute() {
+			if (request.preExecutionProcessor != null)
+				request.preExecutionProcessor.process(request);
+
 			HoopTiming originalHoop = hoop;
 			hoop = new HoopTiming(originalHoop);
 			hoop.redirectHoop = originalHoop;
@@ -327,7 +328,7 @@ public final class HttpModule
 			logger.logVerbose("+--" + indentation + " Timing, Uploading: " + hoop.uploadInterval);
 			logger.logVerbose("+--" + indentation + " Timing, Waiting for response : " + hoop.waitForServerInterval);
 			logger.logVerbose("+--" + indentation + " Timing, Downloading & Processing: " + hoop.downloadingAndProcessingInterval);
-			logger.logDebug("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
+			logger.logVerbose("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
 		}
 
 		final OutputStream postBody(HttpURLConnection connection, InputStream postStream)

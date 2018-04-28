@@ -101,8 +101,9 @@ public class HttpResponse {
 				logger.logVerbose("+-- Response Length: " + responseSize);
 		}
 
-		logger.logVerbose("+-- Response Headers: ");
 		Map<String, List<String>> headers = getHeaders();
+		if (headers.size() > 0)
+			logger.logVerbose("+-- Response Headers: ");
 		for (String key : headers.keySet()) {
 			for (String value : headers.get(key)) {
 				logger.logVerbose("+---- " + key + ": " + value);

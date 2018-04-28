@@ -7,6 +7,9 @@
 
 package com.nu.art.http;
 
+import com.nu.art.belog.consts.LogLevel;
+import com.nu.art.core.generics.Processor;
+import com.nu.art.http.HttpModule.ExecutionPool;
 import com.nu.art.http.consts.HttpMethod;
 
 import java.io.InputStream;
@@ -15,6 +18,12 @@ import javax.net.ssl.SSLContext;
 
 @SuppressWarnings("WeakerAccess")
 public interface IHttpRequest {
+
+	IHttpRequest setPreExecutionProcessor(Processor<HttpRequest> preExecutionProcessor);
+
+	IHttpRequest setLogLevel(LogLevel logLevel);
+
+	IHttpRequest setExecutionPool(ExecutionPool executionPool);
 
 	IHttpRequest setUrl(String url);
 

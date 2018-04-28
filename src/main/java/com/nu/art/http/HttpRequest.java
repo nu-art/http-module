@@ -9,6 +9,7 @@ package com.nu.art.http;
 
 import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
+import com.nu.art.core.generics.Processor;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.http.HttpModule.ExecutionPool;
 import com.nu.art.http.HttpModule.HoopTiming;
@@ -32,6 +33,7 @@ public abstract class HttpRequest
 
 	// Request
 	private HttpMethod method = HttpMethod.Get;
+	Processor<HttpRequest> preExecutionProcessor;
 	ExecutionPool executionPool;
 	String tag;
 	String url;
@@ -48,6 +50,16 @@ public abstract class HttpRequest
 
 	HttpRequest() {
 		addHeader("accept-encoding", "gzip");
+	}
+
+	public final IHttpRequest setExecutionPool(ExecutionPool executionPool) {
+		this.executionPool = executionPool;
+		return this;
+	}
+
+	public final IHttpRequest setPreExecutionProcessor(Processor<HttpRequest> preExecutionProcessor) {
+		this.preExecutionProcessor = preExecutionProcessor;
+		return this;
 	}
 
 	public final IHttpRequest setLogLevel(LogLevel logLevel) {
@@ -99,11 +111,6 @@ public abstract class HttpRequest
 		return this;
 	}
 
-	protected IHttpRequest setExecutionPool(ExecutionPool executionPool) {
-		this.executionPool = executionPool;
-		return this;
-	}
-
 	@Override
 	public IHttpRequest setSSLContext(SSLContext sslContext) {
 		this.sslContext = sslContext;
@@ -136,6 +143,18 @@ public abstract class HttpRequest
 	*
 	*
 	 */
+
+	public String getBodyAsString() {
+		return bodyAsString;
+	}
+
+	public HttpMethod getMethod() {
+		return method;
+	}
+
+	public String getUrl() {
+		return url;
+	}
 
 	private HttpKeyValue[] getParameters() {
 		Vector<HttpKeyValue> allParameters = new Vector<>();
@@ -191,26 +210,28 @@ public abstract class HttpRequest
 	}
 
 	final void printRequest(ILogger logger, HoopTiming hoop) {
-		logger.logVerbose("+----------------------------- HTTP REQUEST ------------------------------+");
+		logger.logDebug("+----------------------------- HTTP REQUEST ------------------------------+");
 		logger.logInfo("+-- URL(" + hoop.hoopIndex + "): " + method + " - " + finalUrl);
 		logger.logVerbose("+-- Connection-Timeout: " + connectionTimeout);
 
 		if (sslContext != null)
 			logger.logVerbose("+-- SSL-Context: " + sslContext);
 
-		logger.logDebug("+-- Request Params: ");
+		if (urlParams.size() > 0)
+			logger.logDebug("+-- Request Params: ");
 		for (HttpKeyValue param : urlParams) {
 			logger.logDebug("+----  " + param.key + ": " + param.value);
 		}
 
-		logger.logVerbose("+-- Request Headers: ");
+		if (headers.size() > 0)
+			logger.logVerbose("+-- Request Headers: ");
 		for (HttpKeyValue header : headers) {
 			logger.logVerbose("+----  " + header.key + ": " + header.value);
 		}
 
 		if (bodyAsString != null) {
-			logger.logVerbose("+-- Body (" + bodyAsString.getBytes().length + "): ");
-			logger.logDebug("+-- Body: " + bodyAsString);
+			logger.logVerbose("+-- Request Body (" + bodyAsString.getBytes().length + "): ");
+			logger.logDebug("+-- Request Body: " + bodyAsString);
 		} else if (requestBodyLength > 0)
 			logger.logVerbose("+-- Body Length: " + requestBodyLength);
 	}
