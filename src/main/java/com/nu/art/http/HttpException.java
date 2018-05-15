@@ -16,4 +16,12 @@ public class HttpException
 		this.response = response;
 		this.error = error;
 	}
+
+	@Override
+	public String getMessage() {
+		if (error instanceof String)
+			return (String) error;
+
+		return error.toString();
+	}
 }
