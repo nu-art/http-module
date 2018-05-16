@@ -23,8 +23,8 @@ tasks.withType(JavaCompile) {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
-if (project.hasProperty("configureUploadJavaArtifact")) {
-    configureUploadJavaArtifact("com.nu-art-software", "nu-art/${name}")
+if (project.hasProperty("addTask_DeployJavaArtifactToCentral")) {
+    addTask_DeployJavaArtifactToCentral("com.nu-art-software", "nu-art")
 }
 
 dependencies {
