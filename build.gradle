@@ -16,9 +16,13 @@
  * limitations under the License.
  */
 
-applyJavaLibrary("com.nu-art-software", "nu-art")
+applyJavaLibrary()
 
 dependencies {
     api(resolveDependency('module-manager', 'com.nu-art-software', "${NU_ART_VERSION}"))
     implementation "com.google.code.gson:gson:${GSON_VERSION}"
+}
+
+if (project.hasProperty("addTask_DeployJavaArtifactToCentral")) {
+    addTask_DeployJavaArtifactToCentral("com.nu-art-software", "nu-art")
 }
