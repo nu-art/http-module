@@ -45,6 +45,11 @@ import javax.net.ssl.X509TrustManager;
 public final class HttpModule
 	extends Module {
 
+	public interface OnRequestErrorListener {
+
+		void onError(HttpTransaction item, Throwable e);
+	}
+
 	public static class ExecutionPool {
 
 		String key;
@@ -64,6 +69,7 @@ public final class HttpModule
 	 * PoolQueue holding the requests to be executed by its thread pool
 	 */
 	private HashMap<String, HttpPoolQueue> queues = new HashMap<>();
+	private OnRequestErrorListener generalErrorListener;
 
 	private HttpModule() { }
 
@@ -77,6 +83,10 @@ public final class HttpModule
 			queue.createThreads(executionPool.key, executionPool.numberOfThreads);
 		}
 		return queue;
+	}
+
+	public void setGeneralErrorListener(OnRequestErrorListener generalErrorListener) {
+		this.generalErrorListener = generalErrorListener;
 	}
 
 	public void setDefaultLogLevel(LogLevel defaultLogLevel) {
@@ -218,7 +228,8 @@ public final class HttpModule
 		}
 
 		@SuppressWarnings("unchecked")
-		private boolean execute() {
+		private boolean execute()
+			throws IOException {
 			if (request.preExecutionProcessor != null)
 				request.preExecutionProcessor.process(request);
 
@@ -240,10 +251,7 @@ public final class HttpModule
 					return redirect = true;
 				}
 
-				if (response.processFailure(connection)) {
-					responseListener.onError(response);
-					return false;
-				}
+				response.assertFailure(connection);
 
 				processSuccess(connection);
 			} catch (Throwable e) {
@@ -251,8 +259,7 @@ public final class HttpModule
 					request.printRequest(logger, hoop);
 
 				logger.logError("+-- Error: ", e);
-				response.exception = e;
-				responseListener.onError(response, null);
+				throw e;
 			} finally {
 				response.printResponse(logger);
 				printTiming(logger, hoop, "");
@@ -429,7 +436,8 @@ public final class HttpModule
 		}
 	}
 
-	protected void executeAction(HttpTransaction transaction) {
+	protected void executeAction(HttpTransaction transaction)
+		throws IOException {
 		while (transaction.execute())
 			;
 	}
@@ -439,18 +447,25 @@ public final class HttpModule
 
 		@Override
 		protected void onExecutionError(HttpTransaction item, Throwable e) {
-			logWarning("DO WE EVEN GET TO THIS ERROR??", e);
 			HttpResponse httpResponse = new HttpResponse();
 			httpResponse.exception = e;
 			try {
 				item.responseListener.onError(httpResponse);
-			} catch (IOException e1) {
-				logError("Not really sure what to do here....?", e1);
+			} catch (Throwable e1) {
+				logError("ERROR WHILE HANDLING AN ERROR:\nNot really sure what to do here....?", e1);
+			}
+
+			try {
+				if (HttpModule.this.generalErrorListener != null)
+					HttpModule.this.generalErrorListener.onError(item, e);
+			} catch (Throwable e1) {
+				logError("ERROR WHILE HANDLING AN ERROR:\nNot really sure what to do here....?", e1);
 			}
 		}
 
 		@Override
-		protected void executeAction(HttpTransaction transaction) {
+		protected void executeAction(HttpTransaction transaction)
+			throws IOException {
 			HttpModule.this.executeAction(transaction);
 		}
 	}

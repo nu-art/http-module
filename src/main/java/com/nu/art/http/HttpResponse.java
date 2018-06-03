@@ -51,22 +51,20 @@ public class HttpResponse {
 		return responseCode >= 300;
 	}
 
-	final boolean processFailure(HttpURLConnection connection)
+	final void assertFailure(HttpURLConnection connection)
 		throws IOException {
 		if (!hasFailed())
-			return false;
+			return;
 
 		InputStream responseStream = connection.getErrorStream();
-		if (responseStream == null) {
-			throw new HttpException(this, "Got an error response without Error Body");
+		if (responseStream != null) {
+			inputStream = connection.getErrorStream();
+
+			if (hasEncodingType(EncodingType.GZip))
+				inputStream = new GZIPInputStream(inputStream);
 		}
 
-		inputStream = connection.getErrorStream();
-
-		if (hasEncodingType(EncodingType.GZip))
-			inputStream = new GZIPInputStream(inputStream);
-
-		return true;
+		throw new HttpException(this, "Got an error code (" + responseCode + ")");
 	}
 
 	@SuppressWarnings("unchecked")
