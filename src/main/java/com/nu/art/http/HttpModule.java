@@ -73,6 +73,11 @@ public final class HttpModule
 
 	private HttpModule() { }
 
+	public void disposeExecutionQueue(ExecutionPool pool) {
+		HttpPoolQueue poolQueue = getOrCreateQueue(pool);
+		poolQueue.kill();
+	}
+
 	private HttpPoolQueue getOrCreateQueue(ExecutionPool executionPool) {
 		if (executionPool == null)
 			executionPool = DefaultExecutionPool;
