@@ -29,6 +29,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -59,6 +60,24 @@ public final class HttpModule
 			this.key = key;
 			this.numberOfThreads = numberOfThreads;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+
+			if (o == null || getClass() != o.getClass())
+				return false;
+
+			ExecutionPool that = (ExecutionPool) o;
+			return Objects.equals(key, that.key);
+		}
+
+		@Override
+		public int hashCode() {
+
+			return Objects.hash(key);
+		}
 	}
 
 	public ExecutionPool DefaultExecutionPool = new ExecutionPool("http-thread", 5);
@@ -75,6 +94,7 @@ public final class HttpModule
 
 	public void disposeExecutionQueue(ExecutionPool pool) {
 		HttpPoolQueue poolQueue = getOrCreateQueue(pool);
+		queues.remove(pool.key);
 		poolQueue.kill();
 	}
 
