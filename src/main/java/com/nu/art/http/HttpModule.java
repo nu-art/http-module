@@ -53,8 +53,8 @@ public final class HttpModule
 
 	public static class ExecutionPool {
 
-		String key;
-		int numberOfThreads;
+		public String key;
+		public int numberOfThreads;
 
 		public ExecutionPool(String key, int numberOfThreads) {
 			this.key = key;
@@ -93,6 +93,7 @@ public final class HttpModule
 	private HttpModule() { }
 
 	public void disposeExecutionQueue(ExecutionPool pool) {
+		logInfo("disposing execution pool: " + pool.key);
 		HttpPoolQueue poolQueue = getOrCreateQueue(pool);
 		queues.remove(pool.key);
 		poolQueue.kill();
