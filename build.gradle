@@ -21,6 +21,7 @@ applyJavaLibrary()
 dependencies {
     api(resolveDependency('module-manager', 'com.nu-art-software', "${NU_ART_VERSION}"))
     implementation "com.google.code.gson:gson:${GSON_VERSION}"
+    testImplementation 'junit:junit:4.12'
 }
 
 if (project.hasProperty("addTask_DeployJavaArtifactToCentral")) {
