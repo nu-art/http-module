@@ -236,7 +236,7 @@ public final class HttpModule
 		}
 	}
 
-	private class HttpTransaction {
+	public class HttpTransaction {
 
 		private Logger logger = BeLogged.getInstance().getLogger(HttpModule.this);
 
