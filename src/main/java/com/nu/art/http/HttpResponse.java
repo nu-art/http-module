@@ -22,6 +22,8 @@ public class HttpResponse {
 
 	public int responseCode;
 
+	public int responseSize;
+
 	public Throwable exception;
 
 	Map<String, List<String>> headers;
@@ -29,8 +31,6 @@ public class HttpResponse {
 	InputStream inputStream;
 
 	String responseAsString;
-
-	private int responseSize;
 
 	public Map<String, List<String>> getHeaders() {
 		if (headers == null)
