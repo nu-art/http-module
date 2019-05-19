@@ -272,9 +272,8 @@ public final class HttpModule
 
 				waitForResponse(response, connection);
 
-				if (processRedirect()) {
+				if (processRedirect())
 					return redirect = true;
-				}
 
 				response.assertFailure(connection);
 
@@ -363,11 +362,11 @@ public final class HttpModule
 			logger.logVerbose("+--" + indentation + " Timing, Total Hoop: " + hoop.getTotalHoopTime());
 		}
 
-		final OutputStream postBody(HttpURLConnection connection, InputStream postStream)
+		final void postBody(HttpURLConnection connection, InputStream postStream)
 			throws IOException {
 
 			if (postStream == null)
-				return null;
+				return;
 
 			long start = System.currentTimeMillis();
 			byte[] buffer = new byte[1024];
@@ -392,7 +391,7 @@ public final class HttpModule
 			postStream.close();
 			hoop.uploadInterval = System.currentTimeMillis() - start;
 
-			return outputStream;
+//			outputStream.close();
 		}
 
 		private HttpURLConnection connect()
