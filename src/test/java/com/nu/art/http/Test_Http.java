@@ -1,7 +1,7 @@
 package com.nu.art.http;
 
 import com.nu.art.belog.BeLogged;
-import com.nu.art.belog.DefaultLogClient;
+import com.nu.art.belog.loggers.JavaLogger;
 import com.nu.art.http.Transaction_JSON.JsonHttpResponseListener;
 import com.nu.art.modular.core.ModuleManagerBuilder;
 
@@ -22,7 +22,7 @@ public class Test_Http {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() {
-		BeLogged.getInstance().addClient(new DefaultLogClient());
+		BeLogged.getInstance().addClient(new JavaLogger());
 
 		new ModuleManagerBuilder().addModules(HttpModule.class).build();
 	}
