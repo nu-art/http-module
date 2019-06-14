@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.nu.art.belog.loggers.JavaLogger.Config_FastJavaLogger;
 import static com.nu.art.http.consts.HttpMethod.Get;
 
 public class Test_Http {
@@ -22,7 +23,7 @@ public class Test_Http {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() {
-		BeLogged.getInstance().addClient(new JavaLogger());
+		BeLogged.getInstance().setConfig(Config_FastJavaLogger);
 
 		new ModuleManagerBuilder().addModules(HttpModule.class).build();
 	}
