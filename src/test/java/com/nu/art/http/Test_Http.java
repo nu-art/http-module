@@ -36,7 +36,7 @@ public class Test_Http {
 		}
 	}
 
-	@Test
+//	@Test
 	public void test_httpGetRequest() {
 		final AtomicReference<ResponseObj> ref = new AtomicReference<>();
 		new Transaction_GetIP().getIp(new JsonHttpResponseListener<ResponseObj>() {
