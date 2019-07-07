@@ -7,7 +7,7 @@ import com.nu.art.core.interfaces.Serializer;
 import java.lang.reflect.Type;
 
 public class JsonSerializer
-	implements Serializer<Object, String> {
+	extends Serializer<Object, String> {
 
 	public static final JsonSerializer Serializer = new JsonSerializer();
 
