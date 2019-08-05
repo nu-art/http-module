@@ -12,7 +12,8 @@ public enum HttpMethod {
 	Post("POST", true),
 	Put("PUT", true),
 	Patch("PATCH", true),
-	Delete("DELETE", false),;
+	Delete("DELETE", false),
+	;
 
 	public final String method;
 

@@ -138,10 +138,10 @@ public abstract class HttpRequest
 	}
 
 	/*
-	*
-	*
-	*
-	*
+	 *
+	 *
+	 *
+	 *
 	 */
 
 	public String getBodyAsString() {

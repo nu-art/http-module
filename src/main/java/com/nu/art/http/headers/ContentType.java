@@ -11,7 +11,8 @@ public enum ContentType
 	JSON("application/json"),
 	XML("application/xml"),
 	TextPlain("text/plain"),
-	TextHtml("text/html"),;
+	TextHtml("text/html"),
+	;
 
 	static final String key = "content-type";
 

@@ -391,7 +391,7 @@ public final class HttpModule
 			postStream.close();
 			hoop.uploadInterval = System.currentTimeMillis() - start;
 
-//			outputStream.close();
+			//			outputStream.close();
 		}
 
 		private HttpURLConnection connect()
