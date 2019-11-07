@@ -187,6 +187,18 @@ public final class HttpModule
 		}
 	}
 
+	private HashMap<String, String> defaultHeaders;
+
+	public void addDefaultHeader(String key, String value) {
+		if (defaultHeaders == null)
+			defaultHeaders = new HashMap<>();
+		defaultHeaders.put(key, value);
+	}
+
+	public void clearDefaultHeaders() {
+		defaultHeaders.clear();
+	}
+
 	@SuppressWarnings("unused")
 	private abstract class Transaction
 		extends Logger {
@@ -217,7 +229,13 @@ public final class HttpModule
 		private HoopTiming hoop = new HoopTiming();
 
 		protected IHttpRequest createRequest() {
-			return new HttpRequestIn();
+			// TODO: 2019-11-07 Add default header if exists
+			HttpRequestIn httpRequest = new HttpRequestIn();
+			if (defaultHeaders != null & defaultHeaders.size() > 0)
+				for (String key : defaultHeaders.keySet())
+					httpRequest.addHeader(key, defaultHeaders.get(key));
+
+			return httpRequest;
 		}
 
 		protected final <Manager extends Module> Manager getModule(Class<Manager> moduleType) {
