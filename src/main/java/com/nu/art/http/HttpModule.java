@@ -11,6 +11,7 @@ import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
 import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.generics.Processor;
+import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
 import com.nu.art.core.tools.StreamTools;
@@ -187,9 +188,9 @@ public final class HttpModule
 		}
 	}
 
-	private HashMap<String, String> defaultHeaders;
+	private HashMap<String, Getter<String>> defaultHeaders;
 
-	public void addDefaultHeader(String key, String value) {
+	public void addDefaultHeader(String key, Getter<String> value) {
 		if (defaultHeaders == null)
 			defaultHeaders = new HashMap<>();
 		defaultHeaders.put(key, value);
@@ -232,7 +233,7 @@ public final class HttpModule
 			HttpRequestIn httpRequest = new HttpRequestIn();
 			if (defaultHeaders != null & defaultHeaders.size() > 0)
 				for (String key : defaultHeaders.keySet())
-					httpRequest.addHeader(key, defaultHeaders.get(key));
+					httpRequest.addHeader(key, defaultHeaders.get(key).get());
 
 			return httpRequest;
 		}
