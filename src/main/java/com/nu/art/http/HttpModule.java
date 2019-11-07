@@ -229,7 +229,6 @@ public final class HttpModule
 		private HoopTiming hoop = new HoopTiming();
 
 		protected IHttpRequest createRequest() {
-			// TODO: 2019-11-07 Add default header if exists
 			HttpRequestIn httpRequest = new HttpRequestIn();
 			if (defaultHeaders != null & defaultHeaders.size() > 0)
 				for (String key : defaultHeaders.keySet())
