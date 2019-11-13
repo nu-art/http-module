@@ -11,6 +11,7 @@ import com.nu.art.belog.BeLogged;
 import com.nu.art.belog.Logger;
 import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.generics.Processor;
+import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.core.tools.ArrayTools;
 import com.nu.art.core.tools.StreamTools;
@@ -187,6 +188,16 @@ public final class HttpModule
 		}
 	}
 
+	private HashMap<String, Getter<String>> defaultHeaders = new HashMap<>();
+
+	public void addDefaultHeader(String key, Getter<String> value) {
+		defaultHeaders.put(key, value);
+	}
+
+	public void clearDefaultHeaders() {
+		defaultHeaders.clear();
+	}
+
 	@SuppressWarnings("unused")
 	private abstract class Transaction
 		extends Logger {
@@ -217,7 +228,12 @@ public final class HttpModule
 		private HoopTiming hoop = new HoopTiming();
 
 		protected IHttpRequest createRequest() {
-			return new HttpRequestIn();
+			HttpRequestIn httpRequest = new HttpRequestIn();
+
+			for (String key : defaultHeaders.keySet()) // If exist, add default headers to all requests.
+				httpRequest.addHeader(key, defaultHeaders.get(key).get());
+
+			return httpRequest;
 		}
 
 		protected final <Manager extends Module> Manager getModule(Class<Manager> moduleType) {
