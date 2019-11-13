@@ -188,11 +188,9 @@ public final class HttpModule
 		}
 	}
 
-	private HashMap<String, Getter<String>> defaultHeaders;
+	private HashMap<String, Getter<String>> defaultHeaders = new HashMap<>();
 
 	public void addDefaultHeader(String key, Getter<String> value) {
-		if (defaultHeaders == null)
-			defaultHeaders = new HashMap<>();
 		defaultHeaders.put(key, value);
 	}
 
@@ -231,9 +229,9 @@ public final class HttpModule
 
 		protected IHttpRequest createRequest() {
 			HttpRequestIn httpRequest = new HttpRequestIn();
-			if (defaultHeaders != null & defaultHeaders.size() > 0)
-				for (String key : defaultHeaders.keySet())
-					httpRequest.addHeader(key, defaultHeaders.get(key).get());
+
+			for (String key : defaultHeaders.keySet()) // If exist, add default headers to all requests.
+				httpRequest.addHeader(key, defaultHeaders.get(key).get());
 
 			return httpRequest;
 		}
