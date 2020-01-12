@@ -56,10 +56,16 @@ public final class HttpModule
 
 		public String key;
 		public int numberOfThreads;
+		private Processor<Thread> threadInitiator;
 
 		public ExecutionPool(String key, int numberOfThreads) {
 			this.key = key;
 			this.numberOfThreads = numberOfThreads;
+		}
+
+		public ExecutionPool setThreadInitiator(Processor<Thread> threadInitiator) {
+			this.threadInitiator = threadInitiator;
+			return this;
 		}
 
 		@Override
@@ -105,7 +111,7 @@ public final class HttpModule
 
 		HttpPoolQueue queue = queues.get(executionPool.key);
 		if (queue == null) {
-			queues.put(executionPool.key, queue = new HttpPoolQueue());
+			queues.put(executionPool.key, queue = (HttpPoolQueue) new HttpPoolQueue().setThreadInitiator(executionPool.threadInitiator));
 			queue.createThreads(executionPool.key, executionPool.numberOfThreads);
 		}
 		return queue;
