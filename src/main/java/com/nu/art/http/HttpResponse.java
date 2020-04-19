@@ -26,9 +26,9 @@ public class HttpResponse {
 
 	public Throwable exception;
 
-	Map<String, List<String>> headers;
+	public InputStream inputStream;
 
-	InputStream inputStream;
+	Map<String, List<String>> headers;
 
 	String responseAsString;
 
