@@ -10,6 +10,7 @@ package com.nu.art.http;
 import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.exceptions.runtime.BadImplementationException;
 import com.nu.art.core.generics.Processor;
+import com.nu.art.core.interfaces.Getter;
 import com.nu.art.core.interfaces.ILogger;
 import com.nu.art.http.HttpModule.ExecutionPool;
 import com.nu.art.http.HttpModule.HoopTiming;
@@ -42,7 +43,7 @@ public abstract class HttpRequest
 	private int readTimeout = 20000;
 	private Vector<HttpKeyValue> urlParams = new Vector<>();
 	boolean autoRedirect = true;
-	InputStream inputStream;
+	Getter<InputStream> _inputStream;
 	private Vector<HttpKeyValue> headers = new Vector<>();
 	private int requestBodyLength;
 	private SSLContext sslContext;
@@ -107,7 +108,7 @@ public abstract class HttpRequest
 			return this;
 
 		this.bodyAsString = body;
-		setBody(new ByteArrayInputStream(body.getBytes()));
+		setBody(() -> new ByteArrayInputStream(body.getBytes()));
 		return this;
 	}
 
@@ -127,8 +128,8 @@ public abstract class HttpRequest
 		return this;
 	}
 
-	public IHttpRequest setBody(InputStream bodyAsInputStream) {
-		this.inputStream = bodyAsInputStream;
+	public IHttpRequest setBody(Getter<InputStream> bodyAsInputStream) {
+		this._inputStream = bodyAsInputStream;
 		return this;
 	}
 
@@ -181,7 +182,7 @@ public abstract class HttpRequest
 		return finalUrl = urlPath;
 	}
 
-	final HttpURLConnection connect(URL url)
+	final HttpURLConnection connect(URL url, InputStream inputStream)
 		throws IOException {
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -236,7 +237,7 @@ public abstract class HttpRequest
 			logger.logVerbose("+-- Body Length: " + requestBodyLength);
 	}
 
-	final void close() {
+	final void close(InputStream inputStream) {
 		try {
 			if (inputStream != null)
 				inputStream.close();

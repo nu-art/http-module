@@ -9,6 +9,7 @@ package com.nu.art.http;
 
 import com.nu.art.belog.consts.LogLevel;
 import com.nu.art.core.generics.Processor;
+import com.nu.art.core.interfaces.Getter;
 import com.nu.art.http.HttpModule.ExecutionPool;
 import com.nu.art.http.consts.HttpMethod;
 
@@ -43,7 +44,7 @@ public interface IHttpRequest {
 
 	IHttpRequest setReadTimeout(int readTimeout);
 
-	IHttpRequest setBody(InputStream bodyAsInputStream);
+	IHttpRequest setBody(Getter<InputStream> bodyAsInputStream);
 
 	IHttpRequest followRedirect(boolean followRedirect);
 

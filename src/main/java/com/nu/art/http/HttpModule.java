@@ -287,10 +287,12 @@ public final class HttpModule
 			HttpURLConnection connection = null;
 			boolean redirect = false;
 			response = new HttpResponse();
+			InputStream inputStream = null;
 			try {
-				connection = connect();
+				inputStream = request._inputStream.get();
+				connection = connect(inputStream);
 				request.printRequest(logger, hoop);
-				postBody(connection, request.inputStream);
+				postBody(connection, inputStream);
 
 				waitForResponse(response, connection);
 
@@ -312,7 +314,7 @@ public final class HttpModule
 				if (!redirect)
 					logger.logVerbose("+-------------------------------------------------------------------------+");
 
-				request.close();
+				request.close(inputStream);
 				response.close();
 
 				if (connection != null)
@@ -397,6 +399,7 @@ public final class HttpModule
 			int uploaded = 0;
 
 			OutputStream outputStream = connection.getOutputStream();
+
 			while ((length = postStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, length);
 				cached += length;
@@ -416,7 +419,7 @@ public final class HttpModule
 			//			outputStream.close();
 		}
 
-		private HttpURLConnection connect()
+		private HttpURLConnection connect(InputStream inputStream)
 			throws IOException {
 			long start = System.currentTimeMillis();
 
@@ -428,7 +431,7 @@ public final class HttpModule
 				throw new IOException("error parsing url: " + urlPath, e);
 			}
 
-			HttpURLConnection connection = request.connect(hoop.finalUrl = url);
+			HttpURLConnection connection = request.connect(hoop.finalUrl = url, inputStream);
 			hoop.connectionInterval = System.currentTimeMillis() - start;
 			return connection;
 		}
