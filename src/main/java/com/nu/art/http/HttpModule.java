@@ -289,7 +289,7 @@ public final class HttpModule
 			response = new HttpResponse();
 			InputStream inputStream = null;
 			try {
-				inputStream = request._inputStream.get();
+				inputStream = request._inputStream != null ? request._inputStream.get() : null;
 				connection = connect(inputStream);
 				request.printRequest(logger, hoop);
 				postBody(connection, inputStream);
